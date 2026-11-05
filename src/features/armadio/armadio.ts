@@ -1,6 +1,7 @@
 import { useLiveQuery } from 'dexie-react-hooks';
 import { type CapoSalvato, chiediArchivioPersistente, db, nuovoId } from '../../shared/db';
 import type { Capo } from '../../shared/tipi';
+import type { Outfit } from '../outfit/motore';
 
 export type NuovoCapo = Omit<Capo, 'id' | 'creato'>;
 
@@ -35,6 +36,18 @@ export async function aggiornaCapo(id: string, modifiche: Partial<NuovoCapo>): P
   const attuale = await db.capi.get(id);
   if (!attuale) throw new Error('Capo non trovato');
   await db.capi.put(await inSalvato({ ...daSalvato(attuale), ...modifiche }));
+}
+
+/** "Lo metto oggi": conta un uso e ricorda il giorno, per variare nei giorni seguenti. */
+export async function segnaIndossati(outfit: Pick<Outfit, 'pezzi' | 'accessori'>, data: string): Promise<void> {
+  const ids = [...outfit.pezzi, ...outfit.accessori].flatMap((p) => (p.capo ? [p.capo.id] : []));
+  await db.transaction('rw', db.capi, async () => {
+    for (const id of ids) {
+      const capo = await db.capi.get(id);
+      // Lo stesso giorno conta una volta sola.
+      if (capo && capo.ultimoUso !== data) await db.capi.update(id, { usi: (capo.usi ?? 0) + 1, ultimoUso: data });
+    }
+  });
 }
 
 export async function eliminaCapo(id: string): Promise<void> {

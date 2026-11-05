@@ -3,7 +3,7 @@ import type { Capo, Occasione } from '../../shared/tipi';
 import type { Condizioni } from '../meteo/condizioni';
 import type { CategoriaId } from './catalogo';
 import { categoria } from './catalogo';
-import { candidati, fascia, proponiOutfit, temperaturaEffettiva, type RichiestaOutfit } from './motore';
+import { candidati, fascia, giorniTra, proponiOutfit, temperaturaEffettiva, type RichiestaOutfit } from './motore';
 
 function meteo(percepita: number, altro: Partial<Condizioni> = {}): Condizioni {
   return {
@@ -120,8 +120,58 @@ describe('outfit senza armadio', () => {
     expect(o.motivi.join(' ')).toContain('Neve');
   });
 
+  it('a 12° coperto: felpa o maglione sopra, mai la sola t-shirt', () => {
+    for (const genere of ['uomo', 'donna'] as const) {
+      for (const occasione of ['casual', 'lavoro', 'appuntamento', 'aperitivo'] as const) {
+        for (let v = 0; v < 6; v++) {
+          const o = proponiOutfit(richiesta(12, { genere, occasione, variante: v }, { codice: 3 }));
+          expect(slot(o), `${genere} ${occasione} ${v}`).toContain('strato');
+          expect(slot(o)).toContain('capospalla');
+        }
+      }
+    }
+  });
+
+  it('tra 15° e 18°: giacca leggera e maniche lunghe', () => {
+    for (let v = 0; v < 6; v++) {
+      const o = proponiOutfit(richiesta(16, { variante: v }));
+      expect(o.pezzi.find((p) => p.slot === 'capospalla')?.nota).toBe('leggera');
+      const base = o.pezzi.find((p) => p.slot === 'base');
+      if (base && !slot(o).includes('strato')) expect(['tshirt', 'polo', 'top', 'canotta']).not.toContain(base.categoria);
+    }
+    // Con il tiepido la t-shirt torna a andare benissimo.
+    expect(ids(proponiOutfit(richiesta(22)))).toContain('tshirt');
+  });
+
+  it('pioggia possibile ma poco probabile: ombrello pieghevole per sicurezza', () => {
+    const o = proponiOutfit(richiesta(20, {}, { probPioggia: 30 }));
+    expect(o.accessori.find((p) => p.categoria === 'ombrello')?.nota).toBe('pieghevole, per sicurezza');
+    expect(o.motivi.join(' ')).toContain('Qualche goccia possibile (30%)');
+    expect(proponiOutfit(richiesta(20, {}, { probPioggia: 10 })).accessori.some((p) => p.categoria === 'ombrello')).toBe(false);
+  });
+
+  it('con vento forte niente bermuda', () => {
+    for (let v = 0; v < 6; v++) {
+      expect(ids(proponiOutfit(richiesta(27, { variante: v }, { vento: 40 })))).not.toContain('shorts');
+    }
+  });
+
+  it('stile coerente: mai capi lontanissimi per formalità nello stesso outfit', () => {
+    const occasioni = ['casual', 'lavoro', 'appuntamento', 'aperitivo', 'elegante', 'sport'] as const;
+    for (const genere of ['uomo', 'donna'] as const) {
+      for (const occasione of occasioni) {
+        for (const t of [0, 8, 13, 17, 22, 28]) {
+          for (let v = 0; v < 4; v++) {
+            const f = proponiOutfit(richiesta(t, { genere, occasione, variante: v })).pezzi.map((p) => categoria(p.categoria).formalita);
+            expect(Math.max(...f) - Math.min(...f), `${genere} ${occasione} ${t}° v${v}`).toBeLessThanOrEqual(3);
+          }
+        }
+      }
+    }
+  });
+
   it('con vento forte serve una giacca anche se è mite', () => {
-    const o = proponiOutfit(richiesta(17, {}, { vento: 40 }));
+    const o = proponiOutfit(richiesta(19, {}, { vento: 40 }));
     expect(slot(o)).toContain('capospalla');
     expect(o.motivi.join(' ')).toContain('Vento fino a 40 km/h');
   });
@@ -138,12 +188,12 @@ describe('outfit senza armadio', () => {
   });
 
   it('chi è freddoloso si copre di più', () => {
-    const normale = proponiOutfit(richiesta(13.5));
-    const freddoloso = proponiOutfit(richiesta(13.5, { sensibilita: 'freddoloso', genere: 'donna' }));
+    const normale = proponiOutfit(richiesta(16.5));
+    const freddoloso = proponiOutfit(richiesta(16.5, { sensibilita: 'freddoloso', genere: 'donna' }));
     expect(slot(normale)).not.toContain('strato');
     expect(slot(freddoloso)).toContain('strato');
     expect(freddoloso.motivi.join(' ')).toContain('freddolosa');
-    expect(proponiOutfit(richiesta(13.5, { sensibilita: 'caloroso' })).motivi.join(' ')).toContain('3° in più');
+    expect(proponiOutfit(richiesta(16.5, { sensibilita: 'caloroso' })).motivi.join(' ')).toContain('3° in più');
   });
 
   it('uscita elegante uomo: camicia, pantaloni eleganti, blazer, scarpe eleganti', () => {
@@ -298,6 +348,20 @@ describe('outfit con armadio', () => {
     const camicia = o.pezzi.find((p) => p.categoria === 'camicia')!;
     expect(camicia.nomeColore).toBe('bianco a righe blu navy');
     expect([...o.pezzi, ...o.accessori].filter((p) => p.fantasia)).toHaveLength(1);
+  });
+
+  it('salta i capi da lavare, preferisce i preferiti e varia rispetto a ieri', () => {
+    const base = [capo('chino', '#c19a6b'), capo('sneakers', '#ffffff')];
+    const bianca = capo('tshirt', '#ffffff');
+    const nera = capo('tshirt', '#151515');
+    const scelta = (armadio: Capo[]) => proponiOutfit(richiesta(23, { armadio, data: '2026-06-10' })).pezzi.find((p) => p.slot === 'base')!;
+    expect(scelta([...base, bianca, nera]).capo?.id).toBe(bianca.id);
+    expect(scelta([...base, { ...bianca, daLavare: true }, nera]).capo?.id).toBe(nera.id);
+    expect(scelta([...base, bianca, { ...nera, preferito: true }]).capo?.id).toBe(nera.id);
+    expect(scelta([...base, { ...bianca, ultimoUso: '2026-06-09' }, nera]).capo?.id).toBe(nera.id);
+    // Se l'hai messa oggi resta la proposta di oggi.
+    expect(scelta([...base, { ...bianca, ultimoUso: '2026-06-10' }, nera]).capo?.id).toBe(bianca.id);
+    expect(giorniTra('2026-06-09', '2026-06-10')).toBe(1);
   });
 
   it("rispetta le occasioni scelte per ogni capo", () => {

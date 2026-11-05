@@ -46,6 +46,8 @@ const PER_CAPO: Partial<Record<CategoriaId, Exclude<Fantasia, 'unita'>[]>> = {
   gonna: ['quadri', 'fiori'],
   'gonna-lunga': ['fiori', 'pois'],
   sciarpa: ['quadri', 'righe'],
+  'tuta-intera': ['fiori', 'pois'],
+  cravatta: ['righe', 'pois'],
 };
 
 const PER_STAGIONE: Record<Stagione, Exclude<Fantasia, 'unita'>[]> = {

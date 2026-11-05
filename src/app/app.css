@@ -1253,3 +1253,104 @@ details.motivi ul {
     transition: none !important;
   }
 }
+
+/* ---------- Più idee da sfogliare ---------- */
+.idee {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.idee-schede {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.idee-schede::-webkit-scrollbar {
+  display: none;
+}
+
+.idee-schede button {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 36px;
+  padding: 4px 12px 4px 4px;
+  border: 1px solid var(--bordo);
+  border-radius: 999px;
+  background: var(--sfondo);
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--tenue);
+  white-space: nowrap;
+}
+
+.idee-schede button.attiva {
+  border-color: var(--terracotta);
+  background: var(--terracotta-chiaro);
+  color: var(--terracotta-scuro);
+}
+
+.idea-numero {
+  display: inline-grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--carta);
+  font-variant-numeric: tabular-nums;
+}
+
+.idee-striscia {
+  display: flex;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  overscroll-behavior-x: contain;
+}
+
+.idee-striscia::-webkit-scrollbar {
+  display: none;
+}
+
+.idea {
+  flex: 0 0 100%;
+  min-width: 0;
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+}
+
+/* ---------- Armadio: preferiti e capi da lavare ---------- */
+.etichetta-preferito {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--carta);
+  color: var(--terracotta);
+  font-size: 0.85rem;
+}
+
+.etichetta-lavare {
+  position: absolute;
+  bottom: 6px;
+  left: 6px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--inchiostro);
+  color: var(--carta);
+  font-size: 0.68rem;
+  font-weight: 700;
+}
+
+.tessera-figura.da-lavare > svg,
+.tessera-figura.da-lavare > img {
+  opacity: 0.45;
+}

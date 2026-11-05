@@ -1,7 +1,7 @@
 import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { aggiungiCapo } from '../features/armadio/armadio';
+import { aggiungiCapo, elencoCapi } from '../features/armadio/armadio';
 import { aggiungiImpegno } from '../features/impegni/impegni';
 import { salvaProfilo } from '../features/profilo/profilo';
 import { curvaGiornaliera } from '../test/meteoFinto';
@@ -45,21 +45,27 @@ describe('App', () => {
     expect(fetch).toHaveBeenCalledWith(expect.stringContaining('api.open-meteo.com'), expect.anything());
   });
 
-  it('cambiando occasione cambia l’outfit e "Altra idea" propone alternative', async () => {
+  it('cambiando occasione cambia l’outfit; tre idee da sfogliare e "Altre idee"', async () => {
     fetchFinto({ temperatura: curvaGiornaliera(16, 23) });
     await salvaProfilo({ ...PROFILO, genere: 'uomo' });
     const utente = userEvent.setup();
     render(<App />);
 
-    const capi = await screen.findByRole('list', { name: 'Capi consigliati' });
+    await screen.findByRole('list', { name: 'Capi consigliati' });
     await utente.click(screen.getByRole('button', { name: 'Elegante' }));
-    expect(within(capi).getByText('Pantaloni eleganti')).toBeInTheDocument();
-    expect(within(capi).getByText('Scarpe eleganti')).toBeInTheDocument();
+    // Solo l'idea visibile è accessibile: le altre sono nascoste finché non le sfogli.
+    const capi = () => screen.getByRole('list', { name: 'Capi consigliati' });
+    expect(within(capi()).getByText('Pantaloni eleganti')).toBeInTheDocument();
+    expect(within(capi()).getByText('Scarpe eleganti')).toBeInTheDocument();
 
-    const prima = capi.textContent;
-    await utente.click(screen.getByRole('button', { name: 'Altra idea' }));
-    await utente.click(screen.getByRole('button', { name: 'Altra idea' }));
-    expect(capi.textContent).not.toBe(prima);
+    const schede = screen.getAllByRole('tab', { selected: false }).filter((t) => t.closest('.idee-schede'));
+    expect(schede).toHaveLength(2);
+    const prima = capi().textContent;
+    await utente.click(schede[0]);
+    expect(capi().textContent).not.toBe(prima);
+
+    await utente.click(screen.getByRole('button', { name: 'Altre idee' }));
+    expect(screen.getByRole('tab', { name: /Nuova idea/ })).toHaveAttribute('aria-selected', 'true');
   });
 
   it('usa i capi dell’armadio e mostra gli impegni con il loro outfit', async () => {
@@ -73,7 +79,20 @@ describe('App', () => {
     expect(screen.getAllByText('Tuo').length).toBeGreaterThan(0);
     expect(screen.getAllByText('Ti manca').length).toBeGreaterThan(0);
     expect(await screen.findByText('18:30')).toBeInTheDocument();
-    expect(screen.getByText('Asciugamano')).toBeInTheDocument();
+    expect(screen.getAllByText('Asciugamano').length).toBeGreaterThan(0);
+  });
+
+  it('"Lo metto oggi" registra i capi dell’armadio usati', async () => {
+    fetchFinto({ temperatura: curvaGiornaliera(5, 11) });
+    await salvaProfilo(PROFILO);
+    const cappotto = await aggiungiCapo({ categoria: 'cappotto', colore: '#c19a6b', occasioni: ['casual'], impermeabile: false });
+    const utente = userEvent.setup();
+    render(<App />);
+
+    await utente.click(await screen.findByRole('button', { name: 'Lo metto oggi' }));
+    expect(await screen.findByRole('button', { name: /Segnato/ })).toBeDisabled();
+    const [salvato] = await elencoCapi();
+    expect(salvato).toMatchObject({ id: cappotto.id, usi: 1, ultimoUso: OGGI });
   });
 
   it('aggiunge un capo dall’armadio', async () => {
