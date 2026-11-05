@@ -1,0 +1,106 @@
+import { render, screen, waitFor, within } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { aggiungiCapo } from '../features/armadio/armadio';
+import { aggiungiImpegno } from '../features/impegni/impegni';
+import { salvaProfilo } from '../features/profilo/profilo';
+import { curvaGiornaliera } from '../test/meteoFinto';
+import { fermaOrologio, fetchFinto, OGGI, PROFILO, svuotaDati } from '../test/aiuti';
+import { App } from './App';
+
+vi.mock('virtual:pwa-register/react', () => ({
+  useRegisterSW: () => ({ needRefresh: [false, () => {}], offlineReady: [false, () => {}], updateServiceWorker: async () => {} }),
+}));
+
+describe('App', () => {
+  beforeEach(async () => {
+    await svuotaDati();
+    fermaOrologio('10:00');
+    window.location.hash = '';
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+    vi.unstubAllGlobals();
+  });
+
+  it('al primo avvio chiede genere e città, poi mostra meteo e outfit', async () => {
+    const fetch = fetchFinto({ temperatura: curvaGiornaliera(4, 10) });
+    const utente = userEvent.setup();
+    render(<App />);
+
+    const inizia = await screen.findByRole('button', { name: 'Iniziamo' });
+    expect(inizia).toBeDisabled();
+    await utente.click(screen.getByRole('button', { name: 'Uomo' }));
+    await utente.type(screen.getByRole('searchbox', { name: 'Cerca la città' }), 'Rimini');
+    await utente.click(await screen.findByRole('button', { name: /Rimini.*Emilia-Romagna/ }));
+    await utente.click(inizia);
+
+    expect(await screen.findByRole('region', { name: 'Meteo attuale' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Outfit per oggi' })).toBeInTheDocument();
+    const capi = screen.getByRole('list', { name: 'Capi consigliati' });
+    // Fa freddo: servono uno strato e un capospalla.
+    expect(capi.querySelector('[data-slot="capospalla"]')).not.toBeNull();
+    expect(capi.querySelector('[data-slot="strato"]')).not.toBeNull();
+    expect(fetch).toHaveBeenCalledWith(expect.stringContaining('api.open-meteo.com'), expect.anything());
+  });
+
+  it('cambiando occasione cambia l’outfit e "Altra idea" propone alternative', async () => {
+    fetchFinto({ temperatura: curvaGiornaliera(16, 23) });
+    await salvaProfilo({ ...PROFILO, genere: 'uomo' });
+    const utente = userEvent.setup();
+    render(<App />);
+
+    const capi = await screen.findByRole('list', { name: 'Capi consigliati' });
+    await utente.click(screen.getByRole('button', { name: 'Elegante' }));
+    expect(within(capi).getByText('Pantaloni eleganti')).toBeInTheDocument();
+    expect(within(capi).getByText('Scarpe eleganti')).toBeInTheDocument();
+
+    const prima = capi.textContent;
+    await utente.click(screen.getByRole('button', { name: 'Altra idea' }));
+    await utente.click(screen.getByRole('button', { name: 'Altra idea' }));
+    expect(capi.textContent).not.toBe(prima);
+  });
+
+  it('usa i capi dell’armadio e mostra gli impegni con il loro outfit', async () => {
+    fetchFinto({ temperatura: curvaGiornaliera(5, 11) });
+    await salvaProfilo(PROFILO);
+    await aggiungiCapo({ categoria: 'cappotto', colore: '#c19a6b', nome: 'Cappotto cammello', occasioni: ['casual', 'lavoro', 'elegante', 'appuntamento'], impermeabile: false });
+    await aggiungiImpegno({ data: OGGI, ora: '18:30', titolo: 'Palestra', occasione: 'sport' });
+    render(<App />);
+
+    expect(await screen.findAllByText('Cappotto cammello')).not.toHaveLength(0);
+    expect(screen.getAllByText('Tuo').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('Ti manca').length).toBeGreaterThan(0);
+    expect(await screen.findByText('18:30')).toBeInTheDocument();
+    expect(screen.getByText('Asciugamano')).toBeInTheDocument();
+  });
+
+  it('aggiunge un capo dall’armadio', async () => {
+    fetchFinto();
+    await salvaProfilo(PROFILO);
+    window.location.hash = 'armadio';
+    const utente = userEvent.setup();
+    render(<App />);
+
+    expect(await screen.findByText(/armadio è vuoto/)).toBeInTheDocument();
+    await utente.click(screen.getByRole('button', { name: 'Aggiungi capo' }));
+    const dialogo = await screen.findByRole('dialog', { name: 'Nuovo capo' });
+    await utente.selectOptions(within(dialogo).getByRole('combobox'), 'gonna-lunga');
+    await utente.click(within(dialogo).getByRole('button', { name: 'bordeaux' }));
+    await utente.type(within(dialogo).getByRole('textbox'), 'Gonna plissé');
+    await utente.click(within(dialogo).getByRole('button', { name: "Aggiungi all'armadio" }));
+
+    await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
+    expect(await screen.findByRole('button', { name: 'Gonna plissé, bordeaux' })).toBeInTheDocument();
+    expect(screen.getByText('1 capo')).toBeInTheDocument();
+  });
+
+  it('se la rete non risponde avvisa e permette di riprovare', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new Error('offline')));
+    await salvaProfilo(PROFILO);
+    render(<App />);
+    expect(await screen.findByRole('alert')).toHaveTextContent('Meteo non disponibile');
+    expect(screen.getByRole('button', { name: 'Riprova' })).toBeInTheDocument();
+  });
+});
