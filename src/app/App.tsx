@@ -18,6 +18,7 @@ import { AggiornamentoPwa } from './AggiornamentoPwa';
 import { BannerInstalla } from './BannerInstalla';
 import { Benvenuto } from './Benvenuto';
 import { ContestoApp, type DatiApp, type Scheda } from './contesto';
+import { Firma } from './Firma';
 import { Logo } from './Logo';
 
 const SCHEDE: { id: Scheda; nome: string; icona: () => React.JSX.Element }[] = [
@@ -110,6 +111,7 @@ function Guscio({ profilo }: { profilo: Profilo }) {
         {scheda === 'outfit' && <PaginaOutfit />}
         {scheda === 'armadio' && <PaginaArmadio />}
         {scheda === 'profilo' && <PaginaProfilo />}
+        <Firma />
       </main>
 
       <nav className="barra" aria-label="Sezioni">

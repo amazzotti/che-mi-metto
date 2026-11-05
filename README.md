@@ -6,6 +6,8 @@
 
 **La web app che ti dice cosa indossare guardando il meteo, i tuoi impegni e il tuo armadio.**
 
+<sub><i>Ideata e progettata da Alessandro Mazzotti</i></sub>
+
 [![CI](https://github.com/amazzotti/che-mi-metto/actions/workflows/ci.yml/badge.svg)](https://github.com/amazzotti/che-mi-metto/actions/workflows/ci.yml)
 ![PWA](https://img.shields.io/badge/PWA-installabile-c8673e)
 ![React](https://img.shields.io/badge/React-19-61dafb)
@@ -235,3 +237,5 @@ the day** (work, date, cocktails, formal event, gym) and, optionally, **your own
 ## Licenza
 
 [MIT](LICENSE) © 2026 Alessandro Mazzotti
+
+<p align="center"><sub><i>Ideata e progettata da Alessandro Mazzotti</i></sub></p>

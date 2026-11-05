@@ -16,6 +16,7 @@ test.describe('Che mi metto?', () => {
     const capi = page.getByRole('list', { name: 'Capi consigliati' });
     await expect(capi.locator('[data-slot="capospalla"]')).toHaveCount(1);
     await expect(page.getByRole('button', { name: 'Rimini' })).toBeVisible();
+    await expect(page.getByText('Ideata e progettata da Alessandro Mazzotti')).toBeAttached();
 
     // Il profilo resta salvato: ricaricando non riparte la presentazione.
     await page.reload();
