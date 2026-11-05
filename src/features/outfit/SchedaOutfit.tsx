@@ -16,10 +16,27 @@ export function useUrlFoto(foto: Blob | undefined): string | undefined {
   return url;
 }
 
-export function Figura({ pezzo, className }: { pezzo: Pick<Pezzo, 'categoria' | 'colore' | 'nome' | 'capo'>; className?: string }) {
+type DatiFigura = Pick<Pezzo, 'categoria' | 'colore' | 'nome' | 'capo'> & Partial<Pick<Pezzo, 'fantasia' | 'colore2'>>;
+
+export function Figura({ pezzo, className }: { pezzo: DatiFigura; className?: string }) {
   const url = useUrlFoto(pezzo.capo?.foto);
   if (url) return <img src={url} alt={pezzo.nome} className={`figura-foto ${className ?? ''}`} />;
-  return <Sagoma id={categoria(pezzo.categoria).sagoma} colore={pezzo.colore} titolo={pezzo.nome} className={className} />;
+  return (
+    <Sagoma
+      id={categoria(pezzo.categoria).sagoma}
+      colore={pezzo.colore}
+      fantasia={pezzo.fantasia}
+      colore2={pezzo.colore2}
+      titolo={pezzo.nome}
+      className={className}
+    />
+  );
+}
+
+/** Pallino del colore: diviso in due se il capo ha una fantasia. */
+export function PallinoColore({ colore, colore2, fantasia }: { colore: string; colore2?: string; fantasia?: string }) {
+  const sfondo = fantasia && fantasia !== 'unita' && colore2 ? `linear-gradient(135deg, ${colore} 50%, ${colore2} 50%)` : colore;
+  return <i style={{ background: sfondo }} aria-hidden="true" />;
 }
 
 function Tessera({ pezzo, piccola }: { pezzo: Pezzo; piccola?: boolean }) {
@@ -33,7 +50,7 @@ function Tessera({ pezzo, piccola }: { pezzo: Pezzo; piccola?: boolean }) {
       <div className="tessera-testo">
         <strong>{pezzo.nome}</strong>
         <span className="tessera-colore">
-          <i style={{ background: pezzo.colore }} aria-hidden="true" />
+          <PallinoColore colore={pezzo.colore} colore2={pezzo.colore2} fantasia={pezzo.fantasia} />
           {pezzo.nomeColore}
         </span>
         {pezzo.nota && <em>{pezzo.nota}</em>}

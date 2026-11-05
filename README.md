@@ -44,7 +44,9 @@ iPhone, senza passare dall'App Store.
   lista di cosa mettere in borsa.
 - 🧥 **Armadio digitale**: carichi i capi uno per uno, con una foto o scegliendo solo tipo e colore. Il colore viene
   riconosciuto dalla foto. I consigli usano i tuoi vestiti, abbinano i colori e segnalano cosa manca.
-- 🎨 **Sagome disegnate a mano**: senza foto ogni capo è una sagoma SVG colorata col suo colore, leggera e sempre coerente.
+- 🎨 **Sagome disegnate a mano**: senza foto ogni capo è una sagoma SVG con il suo colore e, se vuoi, una fantasia
+  (righe, quadri, pois, fiori) con un secondo colore. Nelle idee generiche l'app aggiunge da sola un capo fantasia
+  adatto a stagione e occasione: fiori in primavera, quadri in autunno, niente fantasie in palestra.
 - 🔄 **"Altra idea"** per avere alternative, **sensibilità al freddo** personale (freddoloso / nella media / caloroso).
 - 📴 **Funziona offline** con le ultime previsioni salvate, **tema chiaro e scuro**, interfaccia pensata per il pollice.
 - 🔒 **Privacy**: nessun account e nessun server. Profilo, foto e impegni restano sul telefono; backup e ripristino con un
@@ -72,14 +74,16 @@ test.
 3. **Pioggia, neve, vento, sole e sbalzi** di temperatura aggiungono correzioni: capi impermeabili, scarpe chiuse, ombrello,
    occhiali, uno strato da togliere.
 4. Con l'**armadio** ogni capo riceve un punteggio (adatto all'occasione, ripara dalla pioggia, sta bene con i colori già
-   scelti); senza armadio si usa una **palette di stagione**.
+   scelti); senza armadio si usa una **palette di stagione**, con al massimo un capo **fantasia** per outfit e un secondo
+   colore che stacca dal fondo.
 5. Ogni consiglio arriva con il **perché**: *"Percepiti 8°: fa freddo. Pioggia probabile (80%): capi che riparano, scarpe
    chiuse e ombrello."*
 
 <p align="center">
-  <img src="docs/screenshots/03-outfit-armadio.png" width="30%" alt="Outfit con capi dell'armadio e capi mancanti" />
-  <img src="docs/screenshots/04-settimana.png" width="30%" alt="Previsioni della settimana" />
-  <img src="docs/screenshots/09-sagome.png" width="30%" alt="Tutte le sagome dei capi" />
+  <img src="docs/screenshots/10-idee-generiche.png" width="24%" alt="Idea di outfit senza armadio, con un capo a fantasia" />
+  <img src="docs/screenshots/03-outfit-armadio.png" width="24%" alt="Outfit con capi dell'armadio e capi mancanti" />
+  <img src="docs/screenshots/04-settimana.png" width="24%" alt="Previsioni della settimana" />
+  <img src="docs/screenshots/09-sagome.png" width="24%" alt="Tutte le sagome dei capi" />
 </p>
 
 ## Tecnologie
@@ -167,7 +171,8 @@ the day** (work, date, cocktails, formal event, gym) and, optionally, **your own
 - Rule-based, fully tested recommendation engine: perceived temperature bands, rain/snow/wind/UV adjustments, occasion
   preferences, colour harmony scoring and seasonal palettes. Every suggestion explains *why*.
 - Digital wardrobe: add items one by one with a photo (resized on device, dominant colour detected automatically) or just
-  type and colour; hand-drawn SVG silhouettes take the item's colour when there is no photo.
+  type, colour and pattern (stripes, checks, polka dots, florals); hand-drawn SVG silhouettes take the item's colours and
+  pattern when there is no photo.
 - Each event gets an outfit computed on the forecast **for that hour**; the gym gets a "pack in your bag" list.
 - Privacy by design: no account, no server, everything stays in IndexedDB on the phone, with JSON backup/restore.
 - Works offline, light/dark theme, mobile-first UI tested on WebKit (Safari engine) with an iPhone viewport.

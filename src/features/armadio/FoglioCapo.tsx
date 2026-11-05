@@ -2,9 +2,10 @@ import { type ChangeEvent, type FormEvent, useId, useState } from 'react';
 import { type Capo, type Genere, OCCASIONI, type Occasione } from '../../shared/tipi';
 import { Foglio } from '../../shared/ui/Foglio';
 import { IconaCestino, IconaFoto } from '../../shared/ui/Icone';
-import { SceltaMultipla } from '../../shared/ui/Scelta';
+import { Scelta, SceltaMultipla } from '../../shared/ui/Scelta';
 import { type CategoriaId, categoria, categoriePerGenere, NOMI_SLOT } from '../outfit/catalogo';
-import { COLORI, nomeColore } from '../outfit/colori';
+import { COLORI, eChiaro, nomeColore } from '../outfit/colori';
+import { descriviColore, type Fantasia, FANTASIE } from '../outfit/fantasie';
 import { Figura } from '../outfit/SchedaOutfit';
 import { aggiornaCapo, aggiungiCapo, eliminaCapo } from './armadio';
 import { preparaFoto } from './foto';
@@ -28,6 +29,8 @@ function Modulo({ capo, genere, onFatto }: { capo?: Capo; genere: Genere; onFatt
   const idFoto = useId();
   const [tipo, setTipo] = useState<CategoriaId>(capo?.categoria ?? 'tshirt');
   const [colore, setColore] = useState(capo?.colore ?? '#1f2a44');
+  const [fantasia, setFantasia] = useState<Fantasia>(capo?.fantasia ?? 'unita');
+  const [colore2, setColore2] = useState(capo?.colore2 ?? '#ffffff');
   const [nome, setNome] = useState(capo?.nome ?? '');
   const [occasioni, setOccasioni] = useState<Occasione[]>(capo?.occasioni ?? [...categoria('tshirt').occasioni]);
   const [impermeabile, setImpermeabile] = useState(capo?.impermeabile ?? false);
@@ -72,7 +75,17 @@ function Modulo({ capo, genere, onFatto }: { capo?: Capo; genere: Genere; onFatt
       setMessaggio('Scegli almeno una occasione in cui lo metteresti.');
       return;
     }
-    const dati = { categoria: tipo, colore, nome: nome.trim() || undefined, occasioni, impermeabile, foto };
+    const conFantasia = fantasia !== 'unita';
+    const dati = {
+      categoria: tipo,
+      colore,
+      fantasia: conFantasia ? fantasia : undefined,
+      colore2: conFantasia ? colore2 : undefined,
+      nome: nome.trim() || undefined,
+      occasioni,
+      impermeabile,
+      foto,
+    };
     try {
       if (capo) await aggiornaCapo(capo.id, dati);
       else await aggiungiCapo(dati);
@@ -93,7 +106,9 @@ function Modulo({ capo, genere, onFatto }: { capo?: Capo; genere: Genere; onFatt
     <form className="modulo" onSubmit={salva}>
       <div className="anteprima-capo">
         <div className="anteprima-figura">
-          <Figura pezzo={{ categoria: tipo, colore, nome: nome || info.nome, capo: foto ? ({ foto } as Capo) : undefined }} />
+          <Figura
+            pezzo={{ categoria: tipo, colore, fantasia, colore2, nome: nome || info.nome, capo: foto ? ({ foto } as Capo) : undefined }}
+          />
         </div>
         <div className="anteprima-azioni">
           <label htmlFor={idFoto} className="bottone secondario">
@@ -128,7 +143,7 @@ function Modulo({ capo, genere, onFatto }: { capo?: Capo; genere: Genere; onFatt
 
       <div className="campo">
         <span>
-          Colore: <strong>{nomeColore(colore)}</strong>
+          {fantasia === 'unita' ? 'Colore' : 'Colore di fondo'}: <strong>{nomeColore(colore)}</strong>
         </span>
         <div className="tavolozza" role="group" aria-label="Colore">
           {COLORI.map((c) => (
@@ -147,6 +162,42 @@ function Modulo({ capo, genere, onFatto }: { capo?: Capo; genere: Genere; onFatt
           </label>
         </div>
       </div>
+
+      <div className="campo">
+        <span>Fantasia</span>
+        <Scelta
+          etichetta="Fantasia"
+          opzioni={FANTASIE}
+          valore={fantasia}
+          onCambia={(f) => {
+            // Al primo passaggio a una fantasia proponiamo un secondo colore che stacchi dal primo.
+            if (fantasia === 'unita' && f !== 'unita') setColore2(eChiaro(colore) ? '#1f2a44' : '#ffffff');
+            setFantasia(f);
+          }}
+          stile="chip"
+        />
+      </div>
+
+      {fantasia !== 'unita' && (
+        <div className="campo">
+          <span>
+            Secondo colore: <strong>{descriviColore(colore, fantasia, colore2)}</strong>
+          </span>
+          <div className="tavolozza" role="group" aria-label="Secondo colore">
+            {COLORI.map((c) => (
+              <button
+                key={c.hex}
+                type="button"
+                className="campione"
+                style={{ background: c.hex }}
+                aria-label={c.nome}
+                aria-pressed={colore2 === c.hex}
+                onClick={() => setColore2(c.hex)}
+              />
+            ))}
+          </div>
+        </div>
+      )}
 
       <label className="campo">
         <span>Nome (facoltativo)</span>
