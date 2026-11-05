@@ -1,0 +1,59 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verifica:
+    name: Lint, tipi, test e build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - name: Lint
+        run: npm run lint
+      - name: Controllo dei tipi
+        run: npm run typecheck
+      - name: Test unitari e dei componenti (con copertura)
+        run: npm run coverage
+      - name: Build di produzione
+        run: npm run build
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: copertura
+          path: coverage/
+          retention-days: 7
+
+  e2e:
+    name: Test end-to-end (WebKit e Chromium)
+    needs: verifica
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - name: Browser per i test
+        run: npx playwright install --with-deps chromium webkit
+      - name: Test sul telefono simulato (iPhone e Android)
+        run: npx playwright test --project=iphone --project=android
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: rapporto-playwright
+          path: playwright-report/
+          retention-days: 7
