@@ -47,7 +47,12 @@ iPhone, senza passare dall'App Store.
 - 🎨 **Sagome disegnate a mano**: senza foto ogni capo è una sagoma SVG con il suo colore e, se vuoi, una fantasia
   (righe, quadri, pois, fiori) con un secondo colore. Nelle idee generiche l'app aggiunge da sola un capo fantasia
   adatto a stagione e occasione: fiori in primavera, quadri in autunno, niente fantasie in palestra.
-- 🔄 **"Altra idea"** per avere alternative, **sensibilità al freddo** personale (freddoloso / nella media / caloroso).
+- 🔄 **Tre idee diverse da sfogliare** per ogni giornata e ogni impegno ("La più adatta", "Più elegante", "Con fantasia"…),
+  più il pulsante **"Altre idee"**. Le idee vengono scelte perché si somiglino il meno possibile.
+- 👕 **Oltre 60 tipi di capi** per uomo e donna, dal gilet al parka, dalla tuta intera ai pantaloni palazzo, ognuno con un
+  livello di **formalità**: nello stesso outfit non finiscono mai capi che stonano.
+- ♥ **Preferiti, "da lavare" e "Lo metto oggi"**: i preferiti escono più spesso, i capi in lavatrice no, e quello che hai
+  messo oggi non te lo ripropone domani. **Sensibilità al freddo** personale (freddoloso / nella media / caloroso).
 - 📴 **Funziona offline** con le ultime previsioni salvate, **tema chiaro e scuro**, interfaccia pensata per il pollice.
 - 🔒 **Privacy**: nessun account e nessun server. Profilo, foto e impegni restano sul telefono; backup e ripristino con un
   file.
@@ -64,20 +69,26 @@ test.
    |---|---|---|
    | Gelo | < 3° | piumino, maglione, sciarpa, berretto, guanti |
    | Freddo | 3-9° | cappotto e maglione |
-   | Fresco | 9-15° | giacca o trench, a volte un maglioncino |
-   | Mite | 15-20° | strati leggeri, giacca per la sera |
+   | Fresco | 9-15° | felpa o maglione e una giacca |
+   | Mite | 15-20° | giacca leggera fino a 18°, maniche lunghe; giacca per la sera |
    | Tiepido | 20-25° | maniche corte o camicia |
    | Caldo | 25-30° | lino, gonne, bermuda, sandali |
    | Torrido | ≥ 30° | il minimo indispensabile, colori chiari |
 
-2. La fascia dice quali capi sono adatti per ogni parte dell'outfit; l'**occasione** li ordina per preferenza.
-3. **Pioggia, neve, vento, sole e sbalzi** di temperatura aggiungono correzioni: capi impermeabili, scarpe chiuse, ombrello,
-   occhiali, uno strato da togliere.
-4. Con l'**armadio** ogni capo riceve un punteggio (adatto all'occasione, ripara dalla pioggia, sta bene con i colori già
-   scelti); senza armadio si usa una **palette di stagione**, con al massimo un capo **fantasia** per outfit e un secondo
-   colore che stacca dal fondo.
-5. Ogni consiglio arriva con il **perché**: *"Percepiti 8°: fa freddo. Pioggia probabile (80%): capi che riparano, scarpe
+   Regole fisse: **maglione o felpa sotto i 15°**, **giacca fino a 18°**, **maniche corte da sole solo sopra i 18°**.
+2. La fascia dice quali capi sono adatti per ogni parte dell'outfit; l'**occasione** li ordina per preferenza. Ogni capo ha
+   una **formalità da 1 a 5** e non può allontanarsi di più di due gradini dagli altri capi scelti.
+3. **Pioggia, neve, vento, sole e sbalzi** di temperatura aggiungono correzioni: capi impermeabili, scarpe chiuse, ombrello
+   (pieghevole già dal 25% di pioggia), niente bermuda con il vento forte, occhiali, uno strato da togliere.
+4. Con l'**armadio** ogni capo riceve un punteggio: adatto all'occasione, ripara dalla pioggia, sta bene con i colori già
+   scelti, formalità coerente, preferito, non messo ieri; i capi da lavare sono esclusi. Senza armadio si usa una **palette
+   di stagione**, con al massimo un capo **fantasia** per outfit e un secondo colore che stacca dal fondo.
+5. Il motore genera nove varianti e ne tiene **tre il più possibile diverse** (somiglianza di Jaccard tra capi e colori).
+6. Ogni consiglio arriva con il **perché**: *"Percepiti 8°: fa freddo. Pioggia probabile (80%): capi che riparano, scarpe
    chiuse e ombrello."*
+
+Prima di scriverlo ho studiato il codice di otto app open source di outfit e armadio digitale: cosa ho imparato da ciascuna,
+con le licenze, è in [docs/ISPIRAZIONI.md](docs/ISPIRAZIONI.md).
 
 <p align="center">
   <img src="docs/screenshots/10-idee-generiche.png" width="24%" alt="Idea di outfit senza armadio, con un capo a fantasia" />
@@ -161,6 +172,8 @@ Ogni push su `main` passa dalla CI; se il repository è pubblico, il workflow
 - Dati meteo: [Open-Meteo.com](https://open-meteo.com/) (CC BY 4.0)
 - Nomi dei luoghi: © [OpenStreetMap](https://www.openstreetmap.org/copyright) contributors
 - Font: [Fraunces](https://fonts.google.com/specimen/Fraunces) (SIL Open Font License)
+- Idee per il motore da progetti open source, senza riusarne il codice: elenco e licenze in
+  [docs/ISPIRAZIONI.md](docs/ISPIRAZIONI.md)
 
 ## English summary
 
@@ -174,6 +187,10 @@ the day** (work, date, cocktails, formal event, gym) and, optionally, **your own
   type, colour and pattern (stripes, checks, polka dots, florals); hand-drawn SVG silhouettes take the item's colours and
   pattern when there is no photo.
 - Each event gets an outfit computed on the forecast **for that hour**; the gym gets a "pack in your bag" list.
+- **Three swipeable, deliberately different ideas** per day and per event: nine variants are generated and the three with
+  the lowest Jaccard similarity are kept. Each of 60+ garment types has a 1–5 **formality** level to keep outfits coherent.
+- Wardrobe extras inspired by open-source projects (see [docs/ISPIRAZIONI.md](docs/ISPIRAZIONI.md)): favourites, "in the
+  laundry" items excluded, and an "I'm wearing it today" button that tracks wear count and avoids repeats.
 - Privacy by design: no account, no server, everything stays in IndexedDB on the phone, with JSON backup/restore.
 - Works offline, light/dark theme, mobile-first UI tested on WebKit (Safari engine) with an iPhone viewport.
 - Stack: React 19, TypeScript, Vite, vite-plugin-pwa, Dexie, Vitest, Testing Library, Playwright, GitHub Actions, GitHub

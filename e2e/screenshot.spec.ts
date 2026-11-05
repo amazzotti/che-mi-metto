@@ -36,12 +36,12 @@ const BACKUP = {
   esportato: `${OGGI}T09:00:00.000Z`,
   profilo: { genere: 'donna', sensibilita: 'normale', posizione: { nome: 'Rimini', lat: 44.06, lon: 12.57, origine: 'ricerca' } },
   capi: [
-    capo('maglione', '#762030', 'Maglione della nonna', ['casual', 'lavoro', 'appuntamento'], FOTO),
+    { ...capo('maglione', '#762030', 'Maglione della nonna', ['casual', 'lavoro', 'appuntamento'], FOTO), preferito: true, usi: 4 },
     capo('jeans', '#4a6b8a', 'Jeans a vita alta'),
     capo('gonna-lunga', '#c19a6b', 'Gonna midi plissé'),
     capo('blusa', '#efe8dc', 'Blusa in seta', undefined, undefined, { fantasia: 'pois', colore2: '#6d1a2c' }),
     capo('camicia', '#ffffff', 'Camicia a righe', ['casual', 'lavoro', 'aperitivo'], undefined, { fantasia: 'righe', colore2: '#1f2a44' }),
-    capo('dolcevita', '#151515'),
+    { ...capo('dolcevita', '#151515'), daLavare: true },
     capo('trench', '#d2bc98', 'Trench beige'),
     capo('cappotto', '#1f2a44'),
     capo('stivaletti', '#6b4a32'),
@@ -56,12 +56,12 @@ const BACKUP = {
   ],
 };
 
-async function foto(page: Page, nome: string) {
+async function foto(page: Page, nome: string, intera = false) {
   // Niente evidenziazioni rimaste dall'ultimo tocco.
   await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur());
   await page.mouse.move(0, 0);
   await page.waitForTimeout(300);
-  await page.screenshot({ path: `${CARTELLA}${nome}.png` });
+  await page.screenshot({ path: `${CARTELLA}${nome}.png`, fullPage: intera });
 }
 
 /** Porta l'elemento in cima allo schermo, appena sotto la testata. */
@@ -96,7 +96,7 @@ test('anteprime per il README', async ({ page }) => {
   await page.evaluate(() => localStorage.setItem('banner-installa-chiuso', '1'));
   await page.reload();
   await page.getByRole('heading', { name: 'Outfit per oggi' }).waitFor();
-  await mostraDallAlto(page, '.outfit');
+  await mostraDallAlto(page, '.idee');
   await foto(page, '10-idee-generiche');
 
   await caricaBackup(page);
@@ -108,7 +108,7 @@ test('anteprime per il README', async ({ page }) => {
   await page.getByRole('heading', { name: 'Outfit per oggi' }).waitFor();
   await foto(page, '02-oggi');
 
-  await mostraDallAlto(page, '.outfit');
+  await mostraDallAlto(page, '.idee');
   await foto(page, '03-outfit-armadio');
 
   await page.getByRole('link', { name: 'Settimana' }).click();
@@ -135,5 +135,5 @@ test('galleria delle sagome', async ({ page }) => {
   await page.setViewportSize({ width: 393, height: 820 });
   await page.goto('./galleria.html');
   await page.locator('svg').first().waitFor();
-  await foto(page, '09-sagome');
+  await foto(page, '09-sagome', true);
 });
