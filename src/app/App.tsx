@@ -12,7 +12,8 @@ import { oggiDispositivo } from '../shared/date';
 import type { Capo, Profilo } from '../shared/tipi';
 import { GenereSagome } from '../features/outfit/Sagoma';
 import { Foglio } from '../shared/ui/Foglio';
-import { IconaArmadio, IconaOggi, IconaPosizione, IconaProfilo, IconaSettimana } from '../shared/ui/Icone';
+import { IconaArmadio, IconaOggi, IconaOutfit, IconaPosizione, IconaProfilo, IconaSettimana } from '../shared/ui/Icone';
+import { PaginaOutfit } from '../features/raccolta/PaginaOutfit';
 import { AggiornamentoPwa } from './AggiornamentoPwa';
 import { BannerInstalla } from './BannerInstalla';
 import { Benvenuto } from './Benvenuto';
@@ -22,6 +23,7 @@ import { Logo } from './Logo';
 const SCHEDE: { id: Scheda; nome: string; icona: () => React.JSX.Element }[] = [
   { id: 'oggi', nome: 'Oggi', icona: IconaOggi },
   { id: 'settimana', nome: 'Settimana', icona: IconaSettimana },
+  { id: 'outfit', nome: 'Outfit', icona: IconaOutfit },
   { id: 'armadio', nome: 'Armadio', icona: IconaArmadio },
   { id: 'profilo', nome: 'Profilo', icona: IconaProfilo },
 ];
@@ -105,6 +107,7 @@ function Guscio({ profilo }: { profilo: Profilo }) {
       <main className="contenuto" id="contenuto" tabIndex={-1}>
         {scheda === 'oggi' && <PaginaOggi key={daAbbinare?.id ?? 'oggi'} />}
         {scheda === 'settimana' && <PaginaSettimana />}
+        {scheda === 'outfit' && <PaginaOutfit />}
         {scheda === 'armadio' && <PaginaArmadio />}
         {scheda === 'profilo' && <PaginaProfilo />}
       </main>

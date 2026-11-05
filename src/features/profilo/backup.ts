@@ -2,6 +2,7 @@ import { db } from '../../shared/db';
 import type { Capo, Impegno, Profilo } from '../../shared/tipi';
 import { elencoCapi, inSalvato } from '../armadio/armadio';
 import { esisteCategoria } from '../outfit/catalogo';
+import type { OutfitSalvato, VoceDiario } from '../raccolta/raccolta';
 import { eFantasia } from '../outfit/fantasie';
 
 type CapoEsportato = Omit<Capo, 'foto'> & { foto?: string };
@@ -13,6 +14,9 @@ export interface DatiBackup {
   profilo: Profilo | null;
   capi: CapoEsportato[];
   impegni: Impegno[];
+  /** Presenti dalla versione 1.1 dell'app: i backup più vecchi non li hanno. */
+  outfit?: OutfitSalvato[];
+  diario?: VoceDiario[];
 }
 
 export async function blobInDataUrl(blob: Blob): Promise<string> {
@@ -32,7 +36,13 @@ export function dataUrlInBlob(url: string): Blob {
 }
 
 export async function datiBackup(adesso = new Date()): Promise<DatiBackup> {
-  const [riga, capi, impegni] = await Promise.all([db.impostazioni.get('profilo'), elencoCapi(), db.impegni.toArray()]);
+  const [riga, capi, impegni, outfit, diario] = await Promise.all([
+    db.impostazioni.get('profilo'),
+    elencoCapi(),
+    db.impegni.toArray(),
+    db.outfit.toArray(),
+    db.diario.toArray(),
+  ]);
   return {
     app: 'che-mi-metto',
     versione: 1,
@@ -42,6 +52,8 @@ export async function datiBackup(adesso = new Date()): Promise<DatiBackup> {
       capi.map(async ({ foto, ...resto }) => (foto ? { ...resto, foto: await blobInDataUrl(foto) } : resto)),
     ),
     impegni,
+    outfit,
+    diario,
   };
 }
 
@@ -83,17 +95,19 @@ export async function ripristinaBackup(dati: DatiBackup): Promise<void> {
   const capi: Capo[] = dati.capi.map(({ foto, ...resto }) => (foto ? { ...resto, foto: dataUrlInBlob(foto) } : resto));
   // Le conversioni vanno fatte prima: dentro una transazione IndexedDB si può aspettare solo il database.
   const salvati = await Promise.all(capi.map(inSalvato));
-  await db.transaction('rw', db.capi, db.impegni, db.impostazioni, async () => {
-    await Promise.all([db.capi.clear(), db.impegni.clear()]);
+  await db.transaction('rw', [db.capi, db.impegni, db.impostazioni, db.outfit, db.diario], async () => {
+    await Promise.all([db.capi.clear(), db.impegni.clear(), db.outfit.clear(), db.diario.clear()]);
     await db.capi.bulkAdd(salvati);
     await db.impegni.bulkAdd(dati.impegni);
+    if (Array.isArray(dati.outfit)) await db.outfit.bulkAdd(dati.outfit);
+    if (Array.isArray(dati.diario)) await db.diario.bulkAdd(dati.diario);
     if (dati.profilo) await db.impostazioni.put({ chiave: 'profilo', valore: dati.profilo });
   });
 }
 
 export async function cancellaTutto(): Promise<void> {
-  await db.transaction('rw', db.capi, db.impegni, db.impostazioni, async () => {
-    await Promise.all([db.capi.clear(), db.impegni.clear(), db.impostazioni.clear()]);
+  await db.transaction('rw', [db.capi, db.impegni, db.impostazioni, db.outfit, db.diario], async () => {
+    await Promise.all([db.capi.clear(), db.impegni.clear(), db.impostazioni.clear(), db.outfit.clear(), db.diario.clear()]);
   });
   try {
     localStorage.clear();

@@ -154,8 +154,8 @@ export function interpretaPrevisioni(dati: unknown, adesso = Date.now()): Previs
   };
 }
 
-export async function scaricaPrevisioni(lat: number, lon: number, segnale?: AbortSignal): Promise<Previsioni> {
-  const risposta = await fetch(urlPrevisioni(lat, lon), { signal: segnale });
+export async function scaricaPrevisioni(lat: number, lon: number, segnale?: AbortSignal, giorni = 7): Promise<Previsioni> {
+  const risposta = await fetch(urlPrevisioni(lat, lon, giorni), { signal: segnale });
   if (!risposta.ok) throw new Error(`Open-Meteo ha risposto ${risposta.status}`);
   return interpretaPrevisioni(await risposta.json());
 }

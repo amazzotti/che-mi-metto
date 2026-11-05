@@ -181,6 +181,34 @@ describe('App', () => {
     expect(await screen.findByText('2 capi')).toBeInTheDocument();
   });
 
+  it('salva un outfit, lo segna nel diario e prepara la valigia', async () => {
+    fetchFinto();
+    await salvaProfilo(PROFILO);
+    const utente = userEvent.setup();
+    render(<App />);
+
+    await utente.click(await screen.findByRole('button', { name: '♡ Salva' }));
+    expect(await screen.findByRole('button', { name: '♥ Salvato' })).toBeDisabled();
+    await utente.click(screen.getByRole('button', { name: 'Lo metto oggi' }));
+    expect(await screen.findByRole('button', { name: /Segnato nel diario/ })).toBeInTheDocument();
+
+    await utente.click(screen.getByRole('link', { name: 'Outfit' }));
+    expect(await screen.findByRole('button', { name: /^Casual\s*Giovedì 5 novembre/ })).toBeInTheDocument();
+    expect(await screen.findByRole('heading', { name: 'Novembre 2026' })).toBeInTheDocument();
+
+    await utente.click(screen.getByRole('button', { name: 'Prepara la valigia' }));
+    const dialogo = await screen.findByRole('dialog', { name: 'Prepara la valigia' });
+    await utente.type(within(dialogo).getByRole('searchbox', { name: 'Cerca la città' }), 'Rimini');
+    await utente.click(await within(dialogo).findByRole('button', { name: /Rimini.*Emilia-Romagna/ }));
+    await utente.click(within(dialogo).getByRole('button', { name: 'Una serata elegante' }));
+    await utente.click(within(dialogo).getByRole('button', { name: 'Prepara la valigia' }));
+    const elenco = await within(dialogo).findByRole('list', { name: 'Capi da mettere in valigia' });
+    expect(within(elenco).getAllByRole('checkbox').length).toBeGreaterThan(4);
+    expect(within(dialogo).getByText(/3 giorni, da/)).toBeInTheDocument();
+    await utente.click(within(dialogo).getByRole('checkbox', { name: 'Pigiama' }));
+    expect(within(dialogo).getByText(/Spuntati 1 su/)).toBeInTheDocument();
+  });
+
   it('"Ieri com\'era?" corregge la temperatura su cui ragiona', async () => {
     fetchFinto();
     await salvaProfilo(PROFILO);

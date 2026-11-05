@@ -5,12 +5,14 @@ import { cercaCitta, posizioneGps } from './posizione';
 
 interface Props {
   onScelta: (p: Posizione) => void;
+  /** Mostra il pulsante "Usa la mia posizione" (non serve per scegliere la meta di un viaggio). */
+  conGps?: boolean;
 }
 
 type Risultato = Posizione & { dettaglio: string };
 
 /** Posizione dal GPS del telefono oppure cercando la città. */
-export function SceltaPosizione({ onScelta }: Props) {
+export function SceltaPosizione({ onScelta, conGps = true }: Props) {
   const [testo, setTesto] = useState('');
   const [risultati, setRisultati] = useState<Risultato[]>([]);
   const [cerco, setCerco] = useState(false);
@@ -55,12 +57,16 @@ export function SceltaPosizione({ onScelta }: Props) {
   const mostraRisultati = testo.trim().length >= 2 ? risultati : [];
   return (
     <div className="scelta-posizione">
-      <button type="button" className="bottone primario largo" onClick={usaGps} disabled={gps}>
-        <IconaPosizione dimensione={18} /> {gps ? 'Cerco la posizione…' : 'Usa la mia posizione'}
-      </button>
-      <div className="separatore">
-        <span>oppure</span>
-      </div>
+      {conGps && (
+        <>
+          <button type="button" className="bottone primario largo" onClick={usaGps} disabled={gps}>
+            <IconaPosizione dimensione={18} /> {gps ? 'Cerco la posizione…' : 'Usa la mia posizione'}
+          </button>
+          <div className="separatore">
+            <span>oppure</span>
+          </div>
+        </>
+      )}
       <label className="campo">
         <span>Cerca la città</span>
         <input

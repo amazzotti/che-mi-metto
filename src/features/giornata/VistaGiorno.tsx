@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useApp } from '../../app/contesto';
-import { nomeRelativo } from '../../shared/date';
+import { giornoEsteso, nomeRelativo } from '../../shared/date';
 import { type Impegno, nomeOccasione, OCCASIONI, type Occasione } from '../../shared/tipi';
 import { IconaCestino, IconaPiu } from '../../shared/ui/Icone';
 import { Scelta } from '../../shared/ui/Scelta';
@@ -12,6 +12,40 @@ import { segnaIndossati } from '../armadio/armadio';
 import { type Idea, proponiIdee } from '../outfit/idee';
 import { IdeeOutfit } from '../outfit/IdeeOutfit';
 import { type Pezzo, pezzoDalCapo } from '../outfit/motore';
+import { condividiImmagine, creaCollage } from '../raccolta/collage';
+import { aggiungiAlDiario, salvaOutfit } from '../raccolta/raccolta';
+import type { Genere } from '../../shared/tipi';
+
+/** Azioni comuni alle idee del giorno e a quelle degli impegni. */
+function azioniIdee(opzioni: {
+  data: string;
+  oggi: string;
+  occasione: Occasione;
+  etichetta: string;
+  etichettaBreve: string;
+  luogo: string;
+  genere: Genere;
+}) {
+  const { data, oggi, occasione, etichetta, etichettaBreve, luogo, genere } = opzioni;
+  return {
+    onIndossa:
+      data === oggi
+        ? async (idea: Idea) => {
+            await segnaIndossati(idea.outfit, data);
+            await aggiungiAlDiario(idea.outfit, data, occasione);
+          }
+        : undefined,
+    onSalva: async (idea: Idea) => {
+      // "Casual · Con gonna midi": si capisce subito quale idea era.
+      const titolo = idea.titolo === 'La più adatta' ? etichettaBreve : `${etichettaBreve} · ${idea.titolo}`;
+      await salvaOutfit(idea.outfit, { titolo, occasione, data });
+    },
+    onCondividi: async (idea: Idea) => {
+      const immagine = await creaCollage(idea.outfit.pezzi, idea.outfit.accessori, etichetta, `${giornoEsteso(data)} · ${luogo}`, genere);
+      await condividiImmagine(immagine, `outfit-${data}.png`, etichetta);
+    },
+  };
+}
 
 /** Apre o chiude il lucchetto su un capo: uno solo per parte dell'outfit. */
 export function cambiaLucchetto(bloccati: Pezzo[], pezzo: Pezzo): Pezzo[] {
@@ -58,7 +92,15 @@ export function VistaGiorno({ data, previsioni }: Props) {
         gruppo,
       )
     : [];
-  const indossa = data === oggi ? (idea: Idea) => segnaIndossati(idea.outfit, data) : undefined;
+  const azioni = azioniIdee({
+    data,
+    oggi,
+    occasione,
+    etichetta: `Il mio outfit · ${nomeOccasione(occasione)}`,
+    etichettaBreve: nomeOccasione(occasione),
+    luogo: profilo.posizione?.nome ?? '',
+    genere: profilo.genere,
+  });
 
   const quando = nomeRelativo(data, oggi);
   return (
@@ -89,8 +131,8 @@ export function VistaGiorno({ data, previsioni }: Props) {
             key={occasione}
             idee={idee}
             onAltreIdee={() => setGruppo((g) => g + 1)}
-            onIndossa={indossa}
             onBlocca={(p) => setBloccati((b) => cambiaLucchetto(b, p))}
+            {...azioni}
           />
         ) : (
           <p className="vuoto">Per questo giorno non ci sono ancora previsioni orarie.</p>
@@ -141,7 +183,15 @@ function SchedaImpegno({ impegno, previsioni, onModifica }: { impegno: Impegno; 
         gruppo,
       )
     : [];
-  const indossa = impegno.data === oggi ? (idea: Idea) => segnaIndossati(idea.outfit, impegno.data) : undefined;
+  const azioni = azioniIdee({
+    data: impegno.data,
+    oggi,
+    occasione: impegno.occasione,
+    etichetta: impegno.titolo,
+    etichettaBreve: impegno.titolo,
+    luogo: profilo.posizione?.nome ?? '',
+    genere: profilo.genere,
+  });
   return (
     <li className="impegno">
       <div className="impegno-testa">
@@ -175,8 +225,8 @@ function SchedaImpegno({ impegno, previsioni, onModifica }: { impegno: Impegno; 
           idee={idee}
           compatta
           onAltreIdee={() => setGruppo((g) => g + 1)}
-          onIndossa={indossa}
           onBlocca={(p) => setBloccati((b) => cambiaLucchetto(b, p))}
+          {...azioni}
         />
       ) : (
         <p className="vuoto">Le previsioni per quell&apos;ora non sono ancora disponibili.</p>

@@ -99,6 +99,7 @@ export function Sagoma({ id, colore, fantasia, colore2, modello, genere, titolo,
   const scuro = chiaroCapo ? sfuma(colore, 0.72) : sfuma(colore, 0.7);
   return (
     <svg
+      xmlns="http://www.w3.org/2000/svg"
       viewBox="0 0 100 100"
       className={className}
       role={titolo ? 'img' : undefined}
