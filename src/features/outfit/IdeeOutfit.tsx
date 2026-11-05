@@ -12,13 +12,19 @@ interface Props {
   onIndossa?: (idea: Idea) => Promise<void>;
   /** Lucchetto sui capi. */
   onBlocca?: (p: Pezzo) => void;
+  /** Salva l'idea tra gli outfit preferiti. */
+  onSalva?: (idea: Idea) => Promise<void>;
+  /** Crea il collage dell'outfit e lo condivide. */
+  onCondividi?: (idea: Idea) => Promise<void>;
   compatta?: boolean;
 }
 
 /** Più proposte affiancate: si sfogliano col dito o toccando le etichette. */
-export function IdeeOutfit({ idee, onAltreIdee, onIndossa, onBlocca, compatta }: Props) {
+export function IdeeOutfit({ idee, onAltreIdee, onIndossa, onBlocca, onSalva, onCondividi, compatta }: Props) {
   const [attiva, setAttiva] = useState(0);
   const [indossata, setIndossata] = useState<string | null>(null);
+  const [salvate, setSalvate] = useState<string[]>([]);
+  const [condivido, setCondivido] = useState(false);
   const striscia = useRef<HTMLDivElement>(null);
   const indice = Math.min(attiva, idee.length - 1);
   const ideaAttiva = idee[indice];
@@ -38,7 +44,7 @@ export function IdeeOutfit({ idee, onAltreIdee, onIndossa, onBlocca, compatta }:
   };
 
   if (!ideaAttiva) return null;
-  const capiMiei = ideaAttiva.outfit.pezzi.some((p) => p.capo);
+  const salvata = salvate.includes(ideaAttiva.chiave);
   return (
     <div className={`idee${compatta ? ' compatte' : ''}`}>
       {idee.length > 1 && (
@@ -77,14 +83,41 @@ export function IdeeOutfit({ idee, onAltreIdee, onIndossa, onBlocca, compatta }:
           Con il lucchetto chiuso il capo resta in tutte le idee: tocca &quot;Altre idee&quot; per vedere cosa ci abbino.
         </p>
       )}
-      {onIndossa && capiMiei && (
+      {(onSalva || onCondividi) && (
+        <div className="idee-azioni">
+          {onSalva && (
+            <button
+              type="button"
+              className={`bottone${salvata ? ' salvata' : ''}`}
+              disabled={salvata}
+              onClick={() => void onSalva(ideaAttiva).then(() => setSalvate((s) => [...s, ideaAttiva.chiave]))}
+            >
+              {salvata ? '♥ Salvato' : '♡ Salva'}
+            </button>
+          )}
+          {onCondividi && (
+            <button
+              type="button"
+              className="bottone"
+              disabled={condivido}
+              onClick={() => {
+                setCondivido(true);
+                void onCondividi(ideaAttiva).finally(() => setCondivido(false));
+              }}
+            >
+              {condivido ? 'Preparo…' : 'Condividi'}
+            </button>
+          )}
+        </div>
+      )}
+      {onIndossa && (
         <button
           type="button"
           className="bottone primario largo"
           disabled={indossata === ideaAttiva.chiave}
           onClick={() => void onIndossa(ideaAttiva).then(() => setIndossata(ideaAttiva.chiave))}
         >
-          {indossata === ideaAttiva.chiave ? 'Segnato: nei prossimi giorni ti propongo altro' : 'Lo metto oggi'}
+          {indossata === ideaAttiva.chiave ? 'Segnato nel diario: nei prossimi giorni ti propongo altro' : 'Lo metto oggi'}
         </button>
       )}
       {onAltreIdee && (

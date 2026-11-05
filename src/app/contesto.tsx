@@ -16,7 +16,7 @@ export interface DatiApp {
   abbina: (capo: Capo) => void;
 }
 
-export type Scheda = 'oggi' | 'settimana' | 'armadio' | 'profilo';
+export type Scheda = 'oggi' | 'settimana' | 'outfit' | 'armadio' | 'profilo';
 
 export const ContestoApp = createContext<DatiApp | null>(null);
 

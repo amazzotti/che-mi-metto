@@ -46,6 +46,9 @@ function Modulo({ capo, genere, onFatto, onAbbina }: { capo?: Capo; genere: Gene
   const [preferito, setPreferito] = useState(capo?.preferito ?? false);
   const [daLavare, setDaLavare] = useState(capo?.daLavare ?? false);
   const [foto, setFoto] = useState<Blob | undefined>(capo?.foto);
+  const [sfondoTolto, setSfondoTolto] = useState(capo?.sfondoTolto ?? false);
+  // Dopo una nuova foto teniamo entrambe le versioni, per poter tornare all'originale.
+  const [versioni, setVersioni] = useState<{ originale: Blob; ritaglio: Blob } | null>(null);
   const [lavoro, setLavoro] = useState(false);
   const [messaggio, setMessaggio] = useState<string | null>(null);
 
@@ -70,11 +73,16 @@ function Modulo({ capo, genere, onFatto, onAbbina }: { capo?: Capo; genere: Gene
     setMessaggio(null);
     try {
       const r = await preparaFoto(file);
-      setFoto(r.foto);
-      if (r.colore) {
-        setColore(r.colore);
-        setMessaggio(`Colore rilevato dalla foto: ${nomeColore(r.colore)}. Puoi cambiarlo qui sotto.`);
-      }
+      setFoto(r.ritaglio ?? r.foto);
+      setSfondoTolto(Boolean(r.ritaglio));
+      setVersioni(r.ritaglio ? { originale: r.foto, ritaglio: r.ritaglio } : null);
+      const testoColore = r.colore ? ` Colore rilevato: ${nomeColore(r.colore)}, puoi cambiarlo qui sotto.` : '';
+      if (r.colore) setColore(r.colore);
+      setMessaggio(
+        r.ritaglio
+          ? `Ho tolto lo sfondo.${testoColore}`
+          : `Non sono riuscito a staccare il capo dallo sfondo: viene meglio fotografandolo su un fondo uniforme (letto, pavimento).${testoColore}`,
+      );
     } catch (err) {
       setMessaggio(err instanceof Error ? err.message : 'Foto non valida');
     } finally {
@@ -101,6 +109,7 @@ function Modulo({ capo, genere, onFatto, onAbbina }: { capo?: Capo; genere: Gene
       preferito: preferito || undefined,
       daLavare: daLavare || undefined,
       foto,
+      sfondoTolto: foto ? sfondoTolto || undefined : undefined,
     };
     try {
       if (capo) await aggiornaCapo(capo.id, dati);
@@ -123,7 +132,7 @@ function Modulo({ capo, genere, onFatto, onAbbina }: { capo?: Capo; genere: Gene
       <div className="anteprima-capo">
         <div className="anteprima-figura">
           <Figura
-            pezzo={{ categoria: tipo, colore, fantasia, colore2, modello, nome: nome || info.nome, capo: foto ? ({ foto } as Capo) : undefined }}
+            pezzo={{ categoria: tipo, colore, fantasia, colore2, modello, nome: nome || info.nome, capo: foto ? ({ foto, sfondoTolto } as Capo) : undefined }}
           />
         </div>
         <div className="anteprima-azioni">
@@ -131,8 +140,28 @@ function Modulo({ capo, genere, onFatto, onAbbina }: { capo?: Capo; genere: Gene
             <IconaFoto /> {foto ? 'Cambia foto' : 'Scatta o scegli foto'}
           </label>
           <input id={idFoto} type="file" accept="image/*" className="nascosto" onChange={scegliFoto} aria-label="Foto del capo" />
+          {versioni && (
+            <button
+              type="button"
+              className="bottone piccolo"
+              onClick={() => {
+                setFoto(sfondoTolto ? versioni.originale : versioni.ritaglio);
+                setSfondoTolto(!sfondoTolto);
+              }}
+            >
+              {sfondoTolto ? 'Rimetti lo sfondo' : 'Togli lo sfondo'}
+            </button>
+          )}
           {foto && (
-            <button type="button" className="bottone piccolo" onClick={() => setFoto(undefined)}>
+            <button
+              type="button"
+              className="bottone piccolo"
+              onClick={() => {
+                setFoto(undefined);
+                setVersioni(null);
+                setSfondoTolto(false);
+              }}
+            >
               Usa la sagoma
             </button>
           )}

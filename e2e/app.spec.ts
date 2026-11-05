@@ -25,7 +25,7 @@ test.describe('Che mi metto?', () => {
   test('tutto sta nello schermo del telefono, senza scorrimento orizzontale', async ({ page }) => {
     await preparaPagina(page);
     await primoAvvio(page);
-    for (const scheda of ['Oggi', 'Settimana', 'Armadio', 'Profilo']) {
+    for (const scheda of ['Oggi', 'Settimana', 'Outfit', 'Armadio', 'Profilo']) {
       await page.getByRole('navigation', { name: 'Sezioni' }).getByRole('link', { name: scheda }).click();
       const larghezze = await page.evaluate(() => [document.documentElement.scrollWidth, window.innerWidth]);
       expect(larghezze[0], scheda).toBeLessThanOrEqual(larghezze[1]);
@@ -93,13 +93,14 @@ test.describe('Che mi metto?', () => {
     await page.getByRole('button', { name: 'Aggiungi capo' }).click();
     const dialogo = page.getByRole('dialog', { name: 'Nuovo capo' });
     await dialogo.getByLabel('Foto del capo').setInputFiles(FOTO);
-    await expect(dialogo.getByText(/Colore rilevato dalla foto: bordeaux/)).toBeVisible();
+    await expect(dialogo.getByText(/Ho tolto lo sfondo. Colore rilevato: bordeaux/)).toBeVisible();
+    await expect(dialogo.getByRole('button', { name: 'Rimetti lo sfondo' })).toBeVisible();
     await dialogo.getByRole('combobox').selectOption('maglione');
     await dialogo.getByRole('textbox', { name: 'Nome (facoltativo)' }).fill('Maglione della nonna');
     await dialogo.getByRole('button', { name: "Aggiungi all'armadio" }).click();
 
     await expect(page.getByRole('button', { name: 'Maglione della nonna, bordeaux' })).toBeVisible();
-    await expect(page.getByRole('button', { name: 'Maglione della nonna, bordeaux' }).locator('img')).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Maglione della nonna, bordeaux' }).locator('img.ritagliata')).toBeVisible();
 
     await page.getByRole('link', { name: 'Oggi' }).click();
     const capi = page.getByRole('list', { name: 'Capi consigliati' });
@@ -128,6 +129,26 @@ test.describe('Che mi metto?', () => {
     await dialogo.getByRole('button', { name: 'Aggiungi Gonna', exact: true }).click();
     await dialogo.getByRole('button', { name: 'Fatto: 2 capi aggiunti' }).click();
     await expect(page.getByText('2 capi')).toBeVisible();
+  });
+
+  test('outfit salvati, diario e valigia', async ({ page }) => {
+    await preparaPagina(page);
+    await primoAvvio(page);
+    await page.getByRole('button', { name: '♡ Salva' }).click();
+    await page.getByRole('button', { name: 'Lo metto oggi' }).click();
+    await expect(page.getByRole('button', { name: /Segnato nel diario/ })).toBeVisible();
+
+    await page.getByRole('link', { name: 'Outfit' }).click();
+    await expect(page.locator('.griglia-outfit').getByText('Casual', { exact: true })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Novembre 2026' })).toBeVisible();
+
+    await page.getByRole('button', { name: 'Prepara la valigia' }).click();
+    const dialogo = page.getByRole('dialog', { name: 'Prepara la valigia' });
+    await dialogo.getByRole('searchbox', { name: 'Cerca la città' }).fill('Rimini');
+    await dialogo.getByRole('button', { name: /Rimini\s*Emilia-Romagna/ }).click();
+    await dialogo.getByRole('button', { name: 'Prepara la valigia' }).click();
+    await expect(dialogo.getByRole('list', { name: 'Capi da mettere in valigia' })).toBeVisible();
+    await expect(dialogo.getByText(/Pioggia prevista/)).toBeVisible();
   });
 
   test('profilo: cambio genere e scarico il backup', async ({ page }) => {

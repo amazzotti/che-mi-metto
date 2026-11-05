@@ -1,4 +1,5 @@
 import { coloreDominante } from '../outfit/colori';
+import { rimuoviSfondo } from './sfondo';
 
 /** Lato massimo della foto salvata: basta per lo schermo del telefono e pesa poco (~80 KB). */
 export const LATO_MASSIMO = 900;
@@ -24,11 +25,15 @@ export function misureRidotte(larghezza: number, altezza: number, lato = LATO_MA
   return { w: Math.max(1, Math.round(larghezza * scala)), h: Math.max(1, Math.round(altezza * scala)) };
 }
 
+function inBlob(tela: HTMLCanvasElement, tipo: string, qualita?: number): Promise<Blob | null> {
+  return new Promise((risolvi) => tela.toBlob(risolvi, tipo, qualita));
+}
+
 /**
- * Ridimensiona e comprime la foto (JPEG) e ne stima il colore principale,
- * guardando la parte centrale dove di solito sta il capo.
+ * Ridimensiona e comprime la foto (JPEG), prova a togliere lo sfondo (immagine con trasparenza)
+ * e stima il colore principale del capo.
  */
-export async function preparaFoto(file: Blob): Promise<{ foto: Blob; colore: string | null }> {
+export async function preparaFoto(file: Blob): Promise<{ foto: Blob; ritaglio: Blob | null; colore: string | null }> {
   const img = await caricaImmagine(file);
   const { w, h } = misureRidotte(img.naturalWidth, img.naturalHeight);
   const tela = document.createElement('canvas');
@@ -40,18 +45,35 @@ export async function preparaFoto(file: Blob): Promise<{ foto: Blob; colore: str
   ctx.fillRect(0, 0, w, h);
   ctx.drawImage(img, 0, 0, w, h);
 
-  const campione = document.createElement('canvas');
-  campione.width = 48;
-  campione.height = 48;
-  const cctx = campione.getContext('2d');
-  let colore: string | null = null;
-  if (cctx) {
-    cctx.drawImage(tela, w * 0.25, h * 0.2, w * 0.5, h * 0.6, 0, 0, 48, 48);
-    colore = coloreDominante(cctx.getImageData(0, 0, 48, 48).data);
-  }
+  const foto = await inBlob(tela, 'image/jpeg', 0.82);
+  if (!foto) throw new Error('Compressione non riuscita');
 
-  const foto = await new Promise<Blob>((risolvi, rifiuta) =>
-    tela.toBlob((b) => (b ? risolvi(b) : rifiuta(new Error('Compressione non riuscita'))), 'image/jpeg', 0.82),
-  );
-  return { foto, colore };
+  // Sfondo: se si riesce a staccare il capo, il colore si calcola solo sul capo.
+  const esito = rimuoviSfondo(ctx.getImageData(0, 0, w, h).data, w, h);
+  let ritaglio: Blob | null = null;
+  let colore: string | null = null;
+  if (esito) {
+    const tagliata = document.createElement('canvas');
+    tagliata.width = esito.larghezza;
+    tagliata.height = esito.altezza;
+    const tctx = tagliata.getContext('2d');
+    if (tctx) {
+      tctx.putImageData(new ImageData(esito.pixel, esito.larghezza, esito.altezza), 0, 0);
+      // WebP con trasparenza dove il browser lo sa fare, altrimenti PNG.
+      ritaglio = await inBlob(tagliata, 'image/webp', 0.85);
+      if (!ritaglio || ritaglio.type !== 'image/webp') ritaglio = await inBlob(tagliata, 'image/png');
+      colore = coloreDominante(esito.pixel);
+    }
+  }
+  if (!colore) {
+    const campione = document.createElement('canvas');
+    campione.width = 48;
+    campione.height = 48;
+    const cctx = campione.getContext('2d');
+    if (cctx) {
+      cctx.drawImage(tela, w * 0.25, h * 0.2, w * 0.5, h * 0.6, 0, 0, 48, 48);
+      colore = coloreDominante(cctx.getImageData(0, 0, 48, 48).data);
+    }
+  }
+  return { foto, ritaglio, colore };
 }

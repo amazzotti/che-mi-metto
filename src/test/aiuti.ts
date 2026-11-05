@@ -12,7 +12,7 @@ export const PROFILO: Profilo = {
 };
 
 export async function svuotaDati() {
-  await Promise.all([db.capi.clear(), db.impegni.clear(), db.impostazioni.clear()]);
+  await Promise.all([db.capi.clear(), db.impegni.clear(), db.impostazioni.clear(), db.outfit.clear(), db.diario.clear()]);
   localStorage.clear();
 }
 

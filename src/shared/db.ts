@@ -1,4 +1,5 @@
 import Dexie, { type Table } from 'dexie';
+import type { OutfitSalvato, VoceDiario } from '../features/raccolta/raccolta';
 import type { Capo, Impegno } from './tipi';
 
 /** Un capo come sta nel database: la foto è un ArrayBuffer con il suo tipo. */
@@ -18,6 +19,8 @@ export class DbCheMiMetto extends Dexie {
   capi!: Table<CapoSalvato, string>;
   impegni!: Table<Impegno, string>;
   impostazioni!: Table<Impostazione, string>;
+  outfit!: Table<OutfitSalvato, string>;
+  diario!: Table<VoceDiario, string>;
 
   constructor(nome = 'che-mi-metto') {
     super(nome);
@@ -25,6 +28,11 @@ export class DbCheMiMetto extends Dexie {
       capi: 'id, categoria, creato',
       impegni: 'id, data',
       impostazioni: 'chiave',
+    });
+    // Versione 2: outfit salvati e diario di cosa hai indossato.
+    this.version(2).stores({
+      outfit: 'id, creato',
+      diario: 'id, data',
     });
   }
 }
