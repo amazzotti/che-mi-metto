@@ -1354,3 +1354,206 @@ details.motivi ul {
 .tessera-figura.da-lavare > img {
   opacity: 0.45;
 }
+
+/* ---------- Lucchetto ---------- */
+.lucchetto {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--bordo);
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--carta) 90%, transparent);
+  color: var(--tenue);
+}
+
+.lucchetto[aria-pressed='true'] {
+  border-color: var(--terracotta);
+  background: var(--terracotta);
+  color: #fff;
+}
+
+.tessera.bloccata {
+  box-shadow: inset 0 0 0 2px var(--terracotta);
+}
+
+.nota-lucchetto {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--tenue);
+}
+
+/* ---------- Aggiunta rapida ---------- */
+.tavolozza.rapida {
+  position: sticky;
+  top: -8px;
+  z-index: 1;
+  padding: 8px 0;
+  background: var(--sfondo);
+}
+
+.rapida-gruppo h3 {
+  margin: 4px 0 8px;
+  font-size: 1rem;
+}
+
+.rapida-griglia {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.rapida-griglia button {
+  position: relative;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 6px 4px;
+  border: 1px solid var(--bordo);
+  border-radius: 14px;
+  background: var(--carta);
+  font-size: 0.72rem;
+  line-height: 1.15;
+  text-align: center;
+}
+
+.rapida-griglia svg {
+  width: 100%;
+  aspect-ratio: 1;
+}
+
+.rapida-conta {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  padding: 1px 6px;
+  border-radius: 999px;
+  background: var(--salvia);
+  color: #fff;
+  font-size: 0.72rem;
+}
+
+.fisso-foglio {
+  position: sticky;
+  bottom: 0;
+}
+
+.azioni-armadio {
+  display: grid;
+  grid-template-columns: 1fr 1.4fr;
+  gap: 8px;
+}
+
+.azioni-armadio.fisso {
+  position: sticky;
+  bottom: calc(var(--barra) + 12px + env(safe-area-inset-bottom));
+}
+
+.azioni-armadio .bottone.primario {
+  box-shadow: 0 8px 24px rgb(200 103 62 / 35%);
+}
+
+.azioni-armadio .bottone.secondario {
+  background: var(--carta);
+  border-color: var(--bordo);
+}
+
+/* ---------- Statistiche ---------- */
+.statistiche-blocco summary {
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.statistiche {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 8px;
+  font-size: 0.9rem;
+}
+
+.statistiche p {
+  margin: 0;
+}
+
+.statistiche-numeri {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+}
+
+.statistiche-numeri div {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 10px 4px;
+  border-radius: 14px;
+  background: var(--sfondo);
+  text-align: center;
+}
+
+.statistiche-numeri strong {
+  font-family: var(--font-titoli);
+  font-size: 1.4rem;
+}
+
+.statistiche-numeri span {
+  color: var(--tenue);
+  font-size: 0.75rem;
+}
+
+/* ---------- Ieri com'era? ---------- */
+.riscontro {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px 16px;
+  border-radius: var(--raggio);
+  background: var(--salvia-chiaro);
+}
+
+.riscontro p {
+  margin: 0;
+}
+
+.riscontro-scelte {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.riscontro-salta {
+  align-self: flex-start;
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--tenue);
+  font-size: 0.85rem;
+  text-decoration: underline;
+}
+
+/* La tavolozza dell'aggiunta rapida sta su una riga sola che scorre. */
+.tavolozza.rapida {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.tavolozza.rapida::-webkit-scrollbar {
+  display: none;
+}
+
+.tavolozza.rapida .campione {
+  flex: none;
+  width: 36px;
+  height: 36px;
+}

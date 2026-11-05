@@ -54,7 +54,7 @@ test.describe('Che mi metto?', () => {
     await page.getByRole('tablist', { name: 'Idee di outfit' }).getByRole('tab').nth(1).click();
     await expect(capi).not.toHaveText(prima ?? '');
     await page.getByRole('button', { name: 'Altre idee' }).click();
-    await expect(page.getByRole('tab', { name: /Nuova idea/ })).toHaveAttribute('aria-selected', 'true');
+    await expect(page.getByRole('tablist', { name: 'Idee di outfit' }).getByRole('tab').first()).toHaveAttribute('aria-selected', 'true');
   });
 
   test('settimana: giorno di pioggia e impegno serale', async ({ page }) => {
@@ -106,6 +106,28 @@ test.describe('Che mi metto?', () => {
     await expect(capi.getByText('Maglione della nonna')).toBeVisible();
     await expect(capi.getByText('Tuo')).toBeVisible();
     await expect(page.getByRole('tabpanel').first().getByText(/Nel tuo armadio non ho trovato/)).toBeVisible();
+  });
+
+  test('lucchetto e aggiunta rapida', async ({ page }) => {
+    await preparaPagina(page);
+    await primoAvvio(page);
+
+    // Tengo fissa la parte di sotto e chiedo altre idee: resta sempre quella.
+    const idea = page.getByRole('tabpanel').first();
+    const sotto = idea.locator('[data-slot="sotto"], [data-slot="intero"]').first();
+    const nome = (await sotto.locator('strong').textContent())!;
+    await sotto.getByRole('button', { name: `Tieni fisso ${nome}` }).click();
+    await page.getByRole('button', { name: 'Altre idee' }).click();
+    await expect(page.getByRole('tabpanel').first().getByRole('button', { name: `Sblocca ${nome}` })).toBeVisible();
+
+    // Aggiunta rapida: due capi in due tocchi.
+    await page.getByRole('link', { name: 'Armadio' }).click();
+    await page.getByRole('button', { name: 'Aggiunta rapida' }).click();
+    const dialogo = page.getByRole('dialog', { name: 'Aggiunta rapida' });
+    await dialogo.getByRole('button', { name: 'Aggiungi Jeans' }).click();
+    await dialogo.getByRole('button', { name: 'Aggiungi Gonna', exact: true }).click();
+    await dialogo.getByRole('button', { name: 'Fatto: 2 capi aggiunti' }).click();
+    await expect(page.getByText('2 capi')).toBeVisible();
   });
 
   test('profilo: cambio genere e scarico il backup', async ({ page }) => {

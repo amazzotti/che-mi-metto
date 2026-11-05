@@ -6,6 +6,7 @@ import { useContaImpegni } from '../impegni/impegni';
 import { infoCodice } from '../meteo/codiciMeteo';
 import { IconaMeteo } from '../meteo/IconaMeteo';
 import { SchedaMeteo } from '../meteo/SchedaMeteo';
+import { Riscontro } from '../profilo/Riscontro';
 import { VistaGiorno } from './VistaGiorno';
 
 function StatoMeteo() {
@@ -37,6 +38,7 @@ export function PaginaOggi() {
       <StatoMeteo />
       {p && (
         <>
+          <Riscontro />
           <SchedaMeteo previsioni={p} oggi={oggi} />
           <VistaGiorno key={oggi} data={oggi} previsioni={p} />
         </>

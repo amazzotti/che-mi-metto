@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react';
 import { IconaMescola } from '../../shared/ui/Icone';
 import type { Idea } from './idee';
+import type { Pezzo } from './motore';
 import { SchedaOutfit } from './SchedaOutfit';
 
 interface Props {
@@ -9,11 +10,13 @@ interface Props {
   onAltreIdee?: () => void;
   /** "Lo metto oggi": registra i capi dell'armadio usati in questa idea. */
   onIndossa?: (idea: Idea) => Promise<void>;
+  /** Lucchetto sui capi. */
+  onBlocca?: (p: Pezzo) => void;
   compatta?: boolean;
 }
 
 /** Più proposte affiancate: si sfogliano col dito o toccando le etichette. */
-export function IdeeOutfit({ idee, onAltreIdee, onIndossa, compatta }: Props) {
+export function IdeeOutfit({ idee, onAltreIdee, onIndossa, onBlocca, compatta }: Props) {
   const [attiva, setAttiva] = useState(0);
   const [indossata, setIndossata] = useState<string | null>(null);
   const striscia = useRef<HTMLDivElement>(null);
@@ -65,10 +68,15 @@ export function IdeeOutfit({ idee, onAltreIdee, onIndossa, compatta }: Props) {
             aria-hidden={i !== indice}
             inert={i !== indice}
           >
-            <SchedaOutfit outfit={idea.outfit} compatta={compatta} />
+            <SchedaOutfit outfit={idea.outfit} compatta={compatta} onBlocca={onBlocca} />
           </div>
         ))}
       </div>
+      {ideaAttiva.outfit.pezzi.some((p) => p.bloccato) && (
+        <p className="nota-lucchetto">
+          Con il lucchetto chiuso il capo resta in tutte le idee: tocca &quot;Altre idee&quot; per vedere cosa ci abbino.
+        </p>
+      )}
       {onIndossa && capiMiei && (
         <button
           type="button"

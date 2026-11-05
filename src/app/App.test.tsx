@@ -3,7 +3,7 @@ import userEvent from '@testing-library/user-event';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { aggiungiCapo, elencoCapi } from '../features/armadio/armadio';
 import { aggiungiImpegno } from '../features/impegni/impegni';
-import { salvaProfilo } from '../features/profilo/profilo';
+import { leggiProfilo, salvaProfilo } from '../features/profilo/profilo';
 import { curvaGiornaliera } from '../test/meteoFinto';
 import { fermaOrologio, fetchFinto, OGGI, PROFILO, svuotaDati } from '../test/aiuti';
 import { App } from './App';
@@ -65,7 +65,7 @@ describe('App', () => {
     expect(capi().textContent).not.toBe(prima);
 
     await utente.click(screen.getByRole('button', { name: 'Altre idee' }));
-    expect(screen.getByRole('tab', { name: /Nuova idea/ })).toHaveAttribute('aria-selected', 'true');
+    expect(within(screen.getByRole('tablist', { name: 'Idee di outfit' })).getAllByRole('tab')[0]).toHaveAttribute('aria-selected', 'true');
   });
 
   it('usa i capi dell’armadio e mostra gli impegni con il loro outfit', async () => {
@@ -121,5 +121,75 @@ describe('App', () => {
     render(<App />);
     expect(await screen.findByRole('alert')).toHaveTextContent('Meteo non disponibile');
     expect(screen.getByRole('button', { name: 'Riprova' })).toBeInTheDocument();
+  });
+
+  it('il lucchetto tiene fermo un capo anche con "Altre idee"', async () => {
+    fetchFinto({ temperatura: curvaGiornaliera(9, 15) });
+    await salvaProfilo(PROFILO);
+    const utente = userEvent.setup();
+    render(<App />);
+
+    const capi = await screen.findByRole('list', { name: 'Capi consigliati' });
+    const sotto = capi.querySelector('[data-slot="sotto"], [data-slot="intero"]')!;
+    const nome = sotto.querySelector('strong')!.textContent!;
+    await utente.click(within(sotto as HTMLElement).getByRole('button', { name: `Tieni fisso ${nome}` }));
+    expect(await screen.findByRole('button', { name: `Sblocca ${nome}` })).toHaveAttribute('aria-pressed', 'true');
+
+    await utente.click(screen.getByRole('button', { name: 'Altre idee' }));
+    await utente.click(screen.getByRole('button', { name: 'Altre idee' }));
+    expect(within(screen.getByRole('list', { name: 'Capi consigliati' })).getByText(nome)).toBeInTheDocument();
+
+    await utente.click(screen.getByRole('button', { name: `Sblocca ${nome}` }));
+    expect(screen.queryByRole('button', { name: `Sblocca ${nome}` })).not.toBeInTheDocument();
+  });
+
+  it('"Abbinalo" porta agli outfit di oggi con il capo già fissato', async () => {
+    fetchFinto({ temperatura: curvaGiornaliera(9, 15) });
+    await salvaProfilo(PROFILO);
+    await aggiungiCapo({ categoria: 'gonna', colore: '#6d1a2c', nome: 'Gonna bordeaux', occasioni: ['casual', 'aperitivo'], impermeabile: false });
+    window.location.hash = 'armadio';
+    const utente = userEvent.setup();
+    render(<App />);
+
+    await utente.click(await screen.findByRole('button', { name: /Gonna bordeaux/ }));
+    await utente.click(await screen.findByRole('button', { name: /Abbinalo/ }));
+    const capi = await screen.findByRole('list', { name: 'Capi consigliati' });
+    expect(within(capi).getByText('Gonna bordeaux')).toBeInTheDocument();
+    expect(within(capi).getByRole('button', { name: 'Sblocca Gonna bordeaux' })).toBeInTheDocument();
+  });
+
+  it('aggiunta rapida: tocchi i capi che hai e finiscono nell’armadio', async () => {
+    fetchFinto();
+    await salvaProfilo(PROFILO);
+    window.location.hash = 'armadio';
+    const utente = userEvent.setup();
+    render(<App />);
+
+    await utente.click(await screen.findByRole('button', { name: 'Aggiunta rapida' }));
+    const dialogo = await screen.findByRole('dialog', { name: 'Aggiunta rapida' });
+    await utente.click(within(dialogo).getByRole('button', { name: 'Aggiungi Jeans' }));
+    await utente.click(within(dialogo).getByRole('button', { name: 'bordeaux' }));
+    await utente.click(within(dialogo).getByRole('button', { name: 'Aggiungi Maglione' }));
+    await utente.click(await within(dialogo).findByRole('button', { name: 'Fatto: 2 capi aggiunti' }));
+
+    const capi = await elencoCapi();
+    // Con l'orologio fermo dei test i due capi hanno lo stesso orario: confrontiamo senza badare all'ordine.
+    expect(capi.map((c) => [c.categoria, c.colore]).sort()).toEqual([
+      ['jeans', '#4a6b8a'],
+      ['maglione', '#6d1a2c'],
+    ]);
+    expect(await screen.findByText('2 capi')).toBeInTheDocument();
+  });
+
+  it('"Ieri com\'era?" corregge la temperatura su cui ragiona', async () => {
+    fetchFinto();
+    await salvaProfilo(PROFILO);
+    localStorage.setItem('ultimo-giorno-aperto', '2026-11-04');
+    const utente = userEvent.setup();
+    render(<App />);
+
+    await utente.click(await screen.findByRole('button', { name: /Avevo freddo/ }));
+    expect(await screen.findByText(/Ne terrò conto/)).toBeInTheDocument();
+    await waitFor(async () => expect((await leggiProfilo())?.correzione).toBe(0.5));
   });
 });

@@ -11,6 +11,16 @@ import type { Previsioni } from '../meteo/openMeteo';
 import { segnaIndossati } from '../armadio/armadio';
 import { type Idea, proponiIdee } from '../outfit/idee';
 import { IdeeOutfit } from '../outfit/IdeeOutfit';
+import { type Pezzo, pezzoDalCapo } from '../outfit/motore';
+
+/** Apre o chiude il lucchetto su un capo: uno solo per parte dell'outfit. */
+export function cambiaLucchetto(bloccati: Pezzo[], pezzo: Pezzo): Pezzo[] {
+  const altri = bloccati.filter((p) => p.slot !== pezzo.slot);
+  if (pezzo.bloccato) return altri;
+  // Vestito intero e gonna/pantaloni o maglia non stanno insieme.
+  const compatibili = pezzo.slot === 'intero' ? altri.filter((p) => p.slot !== 'sotto' && p.slot !== 'base') : pezzo.slot === 'sotto' || pezzo.slot === 'base' ? altri.filter((p) => p.slot !== 'intero') : altri;
+  return [...compatibili, { ...pezzo, bloccato: true }];
+}
 
 interface Props {
   data: string;
@@ -19,9 +29,14 @@ interface Props {
 
 /** Outfit della giornata + impegni del giorno, ognuno con il suo outfit. */
 export function VistaGiorno({ data, previsioni }: Props) {
-  const { profilo, armadio, oggi, adesso } = useApp();
-  const [occasione, setOccasione] = useState<Occasione>('casual');
+  const { profilo, armadio, oggi, adesso, daAbbinare } = useApp();
+  // "Abbinalo" dall'armadio: si parte con quel capo già fissato.
+  const abbinaQui = data === oggi ? daAbbinare : undefined;
+  const [occasione, setOccasione] = useState<Occasione>(() =>
+    abbinaQui && !abbinaQui.occasioni.includes('casual') ? (abbinaQui.occasioni[0] ?? 'casual') : 'casual',
+  );
   const [gruppo, setGruppo] = useState(0);
+  const [bloccati, setBloccati] = useState<Pezzo[]>(() => (abbinaQui ? [pezzoDalCapo(abbinaQui, profilo.genere)] : []));
   const impegni = useImpegni(data) ?? [];
   const [modulo, setModulo] = useState<{ aperto: boolean; impegno?: Impegno }>({ aperto: false });
 
@@ -29,7 +44,17 @@ export function VistaGiorno({ data, previsioni }: Props) {
   // Il motore è veloce e deterministico: si ricalcola a ogni render senza problemi.
   const idee = condizioni
     ? proponiIdee(
-        { condizioni, genere: profilo.genere, sensibilita: profilo.sensibilita, occasione, data, latitudine: previsioni.latitudine, armadio },
+        {
+          condizioni,
+          genere: profilo.genere,
+          sensibilita: profilo.sensibilita,
+          correzione: profilo.correzione,
+          occasione,
+          data,
+          latitudine: previsioni.latitudine,
+          armadio,
+          bloccati,
+        },
         gruppo,
       )
     : [];
@@ -54,12 +79,19 @@ export function VistaGiorno({ data, previsioni }: Props) {
           onCambia={(o) => {
             setOccasione(o);
             setGruppo(0);
+            setBloccati([]);
           }}
           stile="chip"
           scorrevole
         />
         {idee.length > 0 ? (
-          <IdeeOutfit key={occasione} idee={idee} onAltreIdee={() => setGruppo((g) => g + 1)} onIndossa={indossa} />
+          <IdeeOutfit
+            key={occasione}
+            idee={idee}
+            onAltreIdee={() => setGruppo((g) => g + 1)}
+            onIndossa={indossa}
+            onBlocca={(p) => setBloccati((b) => cambiaLucchetto(b, p))}
+          />
         ) : (
           <p className="vuoto">Per questo giorno non ci sono ancora previsioni orarie.</p>
         )}
@@ -91,6 +123,7 @@ export function VistaGiorno({ data, previsioni }: Props) {
 function SchedaImpegno({ impegno, previsioni, onModifica }: { impegno: Impegno; previsioni: Previsioni; onModifica: () => void }) {
   const { profilo, armadio, oggi } = useApp();
   const [gruppo, setGruppo] = useState(0);
+  const [bloccati, setBloccati] = useState<Pezzo[]>([]);
   const condizioni = condizioniOra(previsioni, impegno.data, impegno.ora);
   const idee = condizioni
     ? proponiIdee(
@@ -98,10 +131,12 @@ function SchedaImpegno({ impegno, previsioni, onModifica }: { impegno: Impegno; 
           condizioni,
           genere: profilo.genere,
           sensibilita: profilo.sensibilita,
+          correzione: profilo.correzione,
           occasione: impegno.occasione,
           data: impegno.data,
           latitudine: previsioni.latitudine,
           armadio,
+          bloccati,
         },
         gruppo,
       )
@@ -136,7 +171,13 @@ function SchedaImpegno({ impegno, previsioni, onModifica }: { impegno: Impegno; 
         </button>
       </div>
       {idee.length > 0 ? (
-        <IdeeOutfit idee={idee} compatta onAltreIdee={() => setGruppo((g) => g + 1)} onIndossa={indossa} />
+        <IdeeOutfit
+          idee={idee}
+          compatta
+          onAltreIdee={() => setGruppo((g) => g + 1)}
+          onIndossa={indossa}
+          onBlocca={(p) => setBloccati((b) => cambiaLucchetto(b, p))}
+        />
       ) : (
         <p className="vuoto">Le previsioni per quell&apos;ora non sono ancora disponibili.</p>
       )}

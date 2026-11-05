@@ -6,12 +6,15 @@ import { Scelta } from '../../shared/ui/Scelta';
 import { categoria, NOMI_SLOT, ORDINE_SLOT, type Slot } from '../outfit/catalogo';
 import { descriviColore } from '../outfit/fantasie';
 import { Figura, PallinoColore } from '../outfit/SchedaOutfit';
+import { FoglioAggiuntaRapida } from './FoglioAggiuntaRapida';
 import { FoglioCapo } from './FoglioCapo';
+import { Statistiche } from './Statistiche';
 
 export function PaginaArmadio() {
-  const { armadio, profilo } = useApp();
+  const { armadio, profilo, abbina } = useApp();
   const [filtro, setFiltro] = useState<Slot | 'tutti'>('tutti');
   const [modulo, setModulo] = useState<{ aperto: boolean; capo?: Capo }>({ aperto: false });
+  const [rapida, setRapida] = useState(false);
 
   const presenti = ORDINE_SLOT.filter((s) => armadio.some((c) => categoria(c.categoria).slot === s));
   const filtroValido = filtro === 'tutti' || presenti.includes(filtro) ? filtro : 'tutti';
@@ -30,7 +33,8 @@ export function PaginaArmadio() {
             <strong>Il tuo armadio è vuoto.</strong> Intanto ti propongo idee generiche.
           </p>
           <p>
-            Carica i tuoi capi uno alla volta, con una foto oppure scegliendo solo tipo e colore: da quel momento i consigli useranno i
+            Usa <strong>Aggiunta rapida</strong> per toccare in un attimo i capi che hai, oppure caricali uno alla volta con una
+            foto. Da quel momento i consigli useranno i
             tuoi vestiti e ti dirò cosa manca.
           </p>
         </div>
@@ -75,10 +79,32 @@ export function PaginaArmadio() {
         </>
       )}
 
-      <button type="button" className="bottone primario largo fisso" onClick={() => setModulo({ aperto: true })}>
-        <IconaPiu /> Aggiungi capo
-      </button>
-      <FoglioCapo aperto={modulo.aperto} capo={modulo.capo} genere={profilo.genere} onChiudi={() => setModulo({ aperto: false })} />
+      {armadio.length > 0 && (
+        <details className="statistiche-blocco">
+          <summary>Statistiche</summary>
+          <Statistiche armadio={armadio} />
+        </details>
+      )}
+
+      <div className="azioni-armadio fisso">
+        <button type="button" className="bottone secondario" onClick={() => setRapida(true)}>
+          Aggiunta rapida
+        </button>
+        <button type="button" className="bottone primario" onClick={() => setModulo({ aperto: true })}>
+          <IconaPiu /> Aggiungi capo
+        </button>
+      </div>
+      <FoglioAggiuntaRapida aperto={rapida} genere={profilo.genere} onChiudi={() => setRapida(false)} />
+      <FoglioCapo
+        aperto={modulo.aperto}
+        capo={modulo.capo}
+        genere={profilo.genere}
+        onChiudi={() => setModulo({ aperto: false })}
+        onAbbina={(capo) => {
+          setModulo({ aperto: false });
+          abbina(capo);
+        }}
+      />
     </section>
   );
 }
