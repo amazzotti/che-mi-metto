@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { Condizioni } from '../meteo/condizioni';
-import { proponiIdee, somiglianza } from './idee';
+import { proponiIdee, semeDelGiorno, somiglianza } from './idee';
 import type { RichiestaOutfit } from './motore';
 
 function richiesta(percepita: number, altro: Partial<RichiestaOutfit> = {}): Omit<RichiestaOutfit, 'variante'> {
@@ -47,8 +47,36 @@ describe('idee multiple', () => {
   it('"Altre idee" passa a un nuovo gruppo di proposte', () => {
     const primo = proponiIdee(richiesta(15)).map((i) => i.chiave);
     const secondo = proponiIdee(richiesta(15), 1);
-    expect(secondo[0].titolo).toBe('Nuova idea');
+    expect(secondo[0].titolo).toMatch(/^Con /);
     expect(secondo.map((i) => i.chiave).some((k) => primo.includes(k))).toBe(false);
+  });
+
+  it('cambia proposta da un giorno all’altro ma non nello stesso giorno', () => {
+    const giorni = ['2026-04-20', '2026-04-21', '2026-04-22', '2026-04-23', '2026-04-24'];
+    const prime = giorni.map((data) => firmaTesto(proponiIdee(richiesta(14, { data }))[0].outfit));
+    expect(new Set(prime).size).toBeGreaterThan(2);
+    expect(firmaTesto(proponiIdee(richiesta(14))[0].outfit)).toBe(firmaTesto(proponiIdee(richiesta(14))[0].outfit));
+    expect(semeDelGiorno('2026-04-20', 'casual')).toBe(semeDelGiorno('2026-04-20', 'casual'));
+  });
+
+  it('per la donna propone anche gonne, vestiti e modelli diversi', () => {
+    const tutte = ['2026-04-20', '2026-04-21', '2026-04-22', '2026-04-23'].flatMap((data) =>
+      [0, 1].flatMap((gruppo) => proponiIdee(richiesta(19, { data }), gruppo)),
+    );
+    const capi = tutte.flatMap((i) => i.outfit.pezzi);
+    expect(capi.some((p) => ['gonna', 'gonna-lunga', 'vestito', 'vestito-estivo', 'tuta-intera'].includes(p.categoria))).toBe(true);
+    expect(new Set(capi.map((p) => p.nome)).size).toBeGreaterThan(10);
+  });
+
+  it('il lucchetto tiene fermo un capo in tutte le idee', () => {
+    const prima = proponiIdee(richiesta(12))[0].outfit;
+    const fisso = prima.pezzi.find((p) => p.slot === 'sotto')!;
+    const idee = [0, 1, 2].flatMap((gruppo) => proponiIdee(richiesta(12, { bloccati: [fisso] }), gruppo));
+    for (const idea of idee) {
+      const sotto = idea.outfit.pezzi.find((p) => p.slot === 'sotto')!;
+      expect(sotto).toMatchObject({ categoria: fisso.categoria, colore: fisso.colore, bloccato: true });
+      expect(idea.outfit.pezzi.some((p) => p.slot === 'intero')).toBe(false);
+    }
   });
 
   it('con un armadio piccolo non inventa doppioni', () => {

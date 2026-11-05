@@ -16,6 +16,7 @@ import type { CategoriaId, Slot } from './catalogo';
 import { categoria } from './catalogo';
 import { armonia, colorePerNome, nomeColore } from './colori';
 import { descriviColore, type Fantasia, fantasiePossibili, secondoColore } from './fantasie';
+import { nomeConModello, numeroModelli } from './modelli';
 import { palette } from './palette';
 
 export type Fascia = 'gelo' | 'freddo' | 'fresco' | 'mite' | 'tiepido' | 'caldo' | 'torrido';
@@ -30,7 +31,12 @@ export const DESCRIZIONE_FASCIA: Record<Fascia, string> = {
   torrido: 'fa molto caldo: tessuti naturali e colori chiari',
 };
 
-export function temperaturaEffettiva(percepita: number, sensibilita: Sensibilita): number {
+/**
+ * Temperatura su cui ragionare: la percepita, corretta per chi è freddoloso o caloroso
+ * e per i riscontri dati con "Ieri com'era?" (`correzione` in gradi, positivo = senti più freddo).
+ */
+export function temperaturaEffettiva(percepita: number, sensibilita: Sensibilita, correzione = 0): number {
+  percepita -= correzione;
   if (sensibilita === 'freddoloso') return percepita - 3;
   if (sensibilita === 'caloroso') return percepita + 3;
   return percepita;
@@ -175,6 +181,10 @@ export interface Pezzo {
   /** Nell'armadio non c'è niente di adatto: è un suggerimento d'acquisto. */
   mancante?: boolean;
   nota?: string;
+  /** Quale modello della sagoma (es. jeans skinny o a zampa). */
+  modello?: number;
+  /** Fissato dall'utente con il lucchetto: resta in tutte le idee. */
+  bloccato?: boolean;
 }
 
 export interface Outfit {
@@ -200,6 +210,10 @@ export interface RichiestaOutfit {
   /** Cambia per ottenere un'altra idea ("Altra idea"). */
   variante?: number;
   armadio?: Capo[];
+  /** Capi fissati con il lucchetto (al massimo uno per parte dell'outfit). */
+  bloccati?: Pezzo[];
+  /** Correzione personale in gradi dai riscontri "Ieri com'era?". */
+  correzione?: number;
 }
 
 function perGenere(ids: CategoriaId[], genere: Genere): CategoriaId[] {
@@ -211,7 +225,7 @@ export function candidati(slot: SlotVestito, f: Fascia, occasione: Occasione, ge
   const adatti = PER_FASCIA[f][slot];
   const preferiti = PER_OCCASIONE[occasione][slot].filter((id) => adatti.includes(id));
   const risultato = perGenere(preferiti, genere);
-  if (risultato.length > 0) return risultato;
+  if (risultato.length > 0) return genere === 'donna' ? primaAncheDaDonna(risultato) : risultato;
   // Nessun capo "da occasione" adatto al clima: ripieghiamo su quelli adatti al clima.
   return perGenere(
     adatti.filter((id) => categoria(id).occasioni.includes(occasione)),
@@ -233,12 +247,38 @@ function scegliColore(lista: string[], variante: number, evita: string[] = []): 
   return fonte[variante % fonte.length];
 }
 
+/**
+ * Per la donna, tra i primi candidati ci deve essere anche un capo da donna (gonna, top, ballerine...),
+ * altrimenti le idee proposte sarebbero quasi sempre "da uomo" (jeans, t-shirt, sneakers).
+ */
+function primaAncheDaDonna(lista: CategoriaId[]): CategoriaId[] {
+  const i = lista.findIndex((id) => !categoria(id).generi.includes('uomo'));
+  if (i <= 1) return lista;
+  const copia = [...lista];
+  const [daDonna] = copia.splice(i, 1);
+  copia.splice(1, 0, daDonna);
+  return copia;
+}
+
 /** Capi a maniche corte o senza maniche: da soli vanno bene solo con il tiepido. */
 const MANICHE_CORTE: CategoriaId[] = ['tshirt', 'polo', 'top', 'canotta', 'maglia-tecnica'];
 
 /** Giorni da "AAAA-MM-GG" a "AAAA-MM-GG". */
 export function giorniTra(da: string, a: string): number {
   return Math.round((Date.parse(`${a}T12:00:00Z`) - Date.parse(`${da}T12:00:00Z`)) / 86_400_000);
+}
+
+/** Un capo dell'armadio come pezzo di outfit già fissato (per "Abbinalo"). */
+export function pezzoDalCapo(capo: Capo, genere: Genere): Pezzo {
+  return {
+    slot: categoria(capo.categoria).slot,
+    categoria: capo.categoria,
+    nome: capo.nome || nomeConModello(capo.categoria, genere, capo.modello),
+    ...coloriDelCapo(capo),
+    modello: capo.modello,
+    capo,
+    bloccato: true,
+  };
 }
 
 function coloriDelCapo(capo: Capo): Pick<Pezzo, 'colore' | 'fantasia' | 'colore2' | 'nomeColore'> {
@@ -257,7 +297,9 @@ function eta(genere: Genere, maschile: string, femminile: string): string {
 export function proponiOutfit(r: RichiestaOutfit): Outfit {
   const { condizioni: c, genere, occasione } = r;
   const variante = Math.max(0, Math.floor(r.variante ?? 0));
-  const t = temperaturaEffettiva(c.percepita, r.sensibilita);
+  const correzione = Math.max(-4, Math.min(4, r.correzione ?? 0));
+  const t = temperaturaEffettiva(c.percepita, r.sensibilita, correzione);
+  const bloccati = new Map((r.bloccati ?? []).filter((p) => p.slot !== 'accessorio').map((p) => [p.slot, p] as const));
   const f = fascia(t);
   const stagione = infoStagione(r.data, r.latitudine);
   const pal = palette(stagione.stagione, occasione);
@@ -273,8 +315,8 @@ export function proponiOutfit(r: RichiestaOutfit): Outfit {
 
   // --- Quali slot servono ---
   // Soglie sulla temperatura percepita: maglione o felpa sotto i 15°, giacca leggera fino a 18°.
-  const serveStrato = occasione === 'sport' ? t < 16 : t < 15;
-  let serveCapospalla = t < 18 || (t < 20 && (pioggia || ventoForte || neve));
+  const serveStrato = (occasione === 'sport' ? t < 16 : t < 15) || bloccati.has('strato');
+  let serveCapospalla = t < 18 || (t < 20 && (pioggia || ventoForte || neve)) || bloccati.has('capospalla');
   let notaCapospalla: string | undefined = t >= 15 && t < 18 ? 'leggera' : undefined;
   if (!serveCapospalla && t < 20 && (c.sera || sbalzo)) {
     serveCapospalla = true;
@@ -357,6 +399,12 @@ export function proponiOutfit(r: RichiestaOutfit): Outfit {
   };
 
   const aggiungi = (slot: SlotVestito, offset: number, nota?: string, filtro?: (id: CategoriaId) => boolean) => {
+    // Capo fissato con il lucchetto: si usa quello, senza discutere.
+    const fisso = bloccati.get(slot);
+    if (fisso) {
+      pezzi.push({ ...fisso, bloccato: true, nota: fisso.nota ?? nota });
+      return;
+    }
     // Niente "total denim": giacca di jeans e jeans insieme non li proponiamo.
     const conJeans = pezzi.some((p) => p.categoria === 'jeans');
     let ordine = candidati(slot, f, occasione, genere).filter((id) => !(conJeans && id === 'giacca-jeans'));
@@ -381,7 +429,8 @@ export function proponiOutfit(r: RichiestaOutfit): Outfit {
         pezzi.push({
           slot,
           categoria: capo.categoria,
-          nome: capo.nome || categoria(capo.categoria).nome,
+          nome: capo.nome || nomeConModello(capo.categoria, genere, capo.modello),
+          modello: capo.modello,
           ...coloriDelCapo(capo),
           capo,
           nota,
@@ -391,10 +440,13 @@ export function proponiOutfit(r: RichiestaOutfit): Outfit {
     }
     const id = ruota(ordine, variante, offset)!;
     const colore = coloreGenerico(slot, id, offset);
+    // Il modello (jeans skinny, gonna a ruota...) cambia con l'idea, così le proposte non si somigliano tutte.
+    const modello = (variante + offset * 2) % numeroModelli(id, genere);
     pezzi.push({
       slot,
       categoria: id,
-      nome: categoria(id).nome,
+      nome: nomeConModello(id, genere, modello),
+      modello,
       colore,
       nomeColore: nomeColore(colore),
       mancante: usaArmadio || undefined,
@@ -411,7 +463,9 @@ export function proponiOutfit(r: RichiestaOutfit): Outfit {
 
   // L'ordine conta per l'armonia dei colori: prima la parte di sotto, poi il resto.
   let intero = false;
-  if (preferisciIntero) {
+  if (bloccati.has('intero')) intero = true;
+  else if (bloccati.has('sotto') || bloccati.has('base')) intero = false;
+  else if (preferisciIntero) {
     const vestitiArmadio = armadio.filter((x) => interi.includes(x.categoria) && x.occasioni.includes(occasione));
     const sottoArmadio = armadio.filter(
       (x) => candidati('sotto', f, occasione, genere).includes(x.categoria) && x.occasioni.includes(occasione),
@@ -436,7 +490,7 @@ export function proponiOutfit(r: RichiestaOutfit): Outfit {
     const mio = armadio.find((x) => x.categoria === id && !x.daLavare);
     accessori.push(
       mio
-        ? { slot: 'accessorio', categoria: id, nome: mio.nome || categoria(id).nome, ...coloriDelCapo(mio), capo: mio, nota }
+        ? { slot: 'accessorio', categoria: id, nome: mio.nome || nomeConModello(id, genere, mio.modello), ...coloriDelCapo(mio), capo: mio, nota }
         : { slot: 'accessorio', categoria: id, nome: categoria(id).nome, colore, nomeColore: nomeColore(colore), nota },
     );
   };
@@ -467,7 +521,7 @@ export function proponiOutfit(r: RichiestaOutfit): Outfit {
   const haGiaFantasia = [...pezzi, ...accessori].some((p) => p.fantasia && p.fantasia !== 'unita');
   if (!haGiaFantasia && variante % 3 !== 2) {
     const ordine: Slot[] = ['intero', 'base', 'sotto', 'strato', 'accessorio'];
-    const generici = ordine.flatMap((s) => [...pezzi, ...accessori].filter((p) => p.slot === s && !p.capo));
+    const generici = ordine.flatMap((s) => [...pezzi, ...accessori].filter((p) => p.slot === s && !p.capo && !p.bloccato));
     for (const p of generici) {
       const possibili = fantasiePossibili(p.categoria, stagione.stagione, occasione);
       if (possibili.length === 0) continue;
@@ -492,6 +546,14 @@ export function proponiOutfit(r: RichiestaOutfit): Outfit {
   motivi.push(`Percepiti ${gradi}°: ${DESCRIZIONE_FASCIA[f]}.`);
   if (r.sensibilita === 'freddoloso') motivi.push(`Sei ${eta(genere, 'freddoloso', 'freddolosa')}: ho considerato 3° in meno.`);
   if (r.sensibilita === 'caloroso') motivi.push(`Soffri il caldo: ho considerato 3° in più.`);
+  if (Math.abs(correzione) >= 0.5) {
+    const gradiCorrezione = Math.abs(correzione).toLocaleString('it-IT');
+    motivi.push(
+      correzione > 0
+        ? `Dai tuoi riscontri senti più freddo del previsto: ho considerato ${gradiCorrezione}° in meno.`
+        : `Dai tuoi riscontri senti più caldo del previsto: ho considerato ${gradiCorrezione}° in più.`,
+    );
+  }
   if (neve) motivi.push('Neve prevista: stivali e capospalla caldo.');
   else if (pioggia) motivi.push(`Pioggia probabile (${Math.round(c.probPioggia)}%): capi che riparano, scarpe chiuse e ombrello.`);
   if (forseGocce) motivi.push(`Qualche goccia possibile (${Math.round(c.probPioggia)}%): un ombrello pieghevole in borsa.`);

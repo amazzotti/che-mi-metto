@@ -4,7 +4,7 @@
  * Il motore produce molte varianti; da queste ne scegliamo poche che si somiglino il meno possibile
  * (somiglianza di Jaccard tra gli insiemi di capi e colori), così le proposte non sono quasi uguali.
  */
-import { categoria } from './catalogo';
+import { categoria, type Slot } from './catalogo';
 import { eNeutro } from './colori';
 import { type Outfit, proponiOutfit, type RichiestaOutfit } from './motore';
 
@@ -34,17 +34,41 @@ const formalita = (o: Outfit) => media(o.pezzi.map((p) => categoria(p.categoria)
 const accesi = (o: Outfit) => o.pezzi.filter((p) => !eNeutro(p.colore)).length;
 
 /** Un titolo breve che dica in cosa l'idea è diversa dalla prima. */
-function titolo(o: Outfit, prima: Outfit | undefined): string {
-  if (!prima) return 'La più adatta';
-  const intero = o.pezzi.find((p) => p.slot === 'intero');
-  if (intero && !prima.pezzi.some((p) => p.slot === 'intero')) return `Con ${intero.nome.toLowerCase()}`;
-  if (o.pezzi.some((p) => p.fantasia) && !prima.pezzi.some((p) => p.fantasia)) return 'Con fantasia';
+/** Le parti dell'outfit che si notano di più, in ordine. */
+const IN_VISTA: Slot[] = ['intero', 'sotto', 'capospalla', 'strato', 'base', 'scarpe'];
+
+const conMinuscola = (nome: string) => `Con ${nome.charAt(0).toLowerCase()}${nome.slice(1)}`;
+
+/** Un titolo breve che dica in cosa l'idea è diversa dalla prima (o, se è la prima di un gruppo, che capo la caratterizza). */
+function titolo(o: Outfit, prima: Outfit | undefined, primaDelGruppo: boolean): string {
+  if (!prima) {
+    if (!primaDelGruppo) return 'La più adatta';
+    const protagonista = IN_VISTA.map((s) => o.pezzi.find((p) => p.slot === s && !p.bloccato)).find(Boolean);
+    return protagonista ? conMinuscola(protagonista.nome) : 'Nuova idea';
+  }
   const df = formalita(o) - formalita(prima);
-  if (df >= 0.4) return 'Più elegante';
-  if (df <= -0.4) return 'Più comoda';
+  if (df >= 0.6) return 'Più elegante';
+  if (df <= -0.6) return 'Più comoda';
+  // Il primo capo "in vista" che cambia rispetto alla prima idea dà il nome all'idea.
+  for (const slot of IN_VISTA) {
+    const p = o.pezzi.find((x) => x.slot === slot && !x.bloccato);
+    const q = prima.pezzi.find((x) => x.slot === slot);
+    if (p && (!q || q.categoria !== p.categoria || (q.modello ?? 0) !== (p.modello ?? 0))) return conMinuscola(p.nome);
+  }
+  if (o.pezzi.some((p) => p.fantasia) && !prima.pezzi.some((p) => p.fantasia)) return 'Con fantasia';
   if (accesi(o) > accesi(prima)) return 'Più colorata';
   if (accesi(o) < accesi(prima)) return 'Più sobria';
   return 'Alternativa';
+}
+
+/**
+ * Un numero che cambia ogni giorno (e per ogni occasione) ma resta uguale per tutto il giorno:
+ * così le proposte variano da un giorno all'altro senza cambiare a ogni apertura dell'app.
+ */
+export function semeDelGiorno(data: string, occasione: string): number {
+  let h = Math.floor(Date.parse(`${data}T12:00:00Z`) / 86_400_000);
+  for (const lettera of occasione) h = (h * 31 + lettera.charCodeAt(0)) % 1_000_003;
+  return h % VARIANTI_PER_GRUPPO;
 }
 
 /**
@@ -52,7 +76,7 @@ function titolo(o: Outfit, prima: Outfit | undefined): string {
  * La prima idea del primo gruppo è sempre la proposta principale del motore.
  */
 export function proponiIdee(r: Omit<RichiestaOutfit, 'variante'>, gruppo = 0, quante = 3): Idea[] {
-  const inizio = gruppo * VARIANTI_PER_GRUPPO;
+  const inizio = gruppo * VARIANTI_PER_GRUPPO + semeDelGiorno(r.data, r.occasione);
   const candidati = Array.from({ length: VARIANTI_PER_GRUPPO }, (_, i) => {
     const variante = inizio + i;
     const outfit = proponiOutfit({ ...r, variante });
@@ -79,8 +103,7 @@ export function proponiIdee(r: Omit<RichiestaOutfit, 'variante'>, gruppo = 0, qu
 
   const titoli = new Set<string>();
   return scelte.map((c, i) => {
-    let t = titolo(c.outfit, i === 0 ? undefined : scelte[0].outfit);
-    if (gruppo > 0 && i === 0) t = 'Nuova idea';
+    let t = titolo(c.outfit, i === 0 ? undefined : scelte[0].outfit, gruppo > 0);
     while (titoli.has(t)) t = t === 'Alternativa' ? 'Altra alternativa' : 'Alternativa';
     titoli.add(t);
     return { chiave: `${gruppo}-${c.variante}`, titolo: t, outfit: c.outfit };
