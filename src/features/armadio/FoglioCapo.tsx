@@ -34,6 +34,8 @@ function Modulo({ capo, genere, onFatto }: { capo?: Capo; genere: Genere; onFatt
   const [nome, setNome] = useState(capo?.nome ?? '');
   const [occasioni, setOccasioni] = useState<Occasione[]>(capo?.occasioni ?? [...categoria('tshirt').occasioni]);
   const [impermeabile, setImpermeabile] = useState(capo?.impermeabile ?? false);
+  const [preferito, setPreferito] = useState(capo?.preferito ?? false);
+  const [daLavare, setDaLavare] = useState(capo?.daLavare ?? false);
   const [foto, setFoto] = useState<Blob | undefined>(capo?.foto);
   const [lavoro, setLavoro] = useState(false);
   const [messaggio, setMessaggio] = useState<string | null>(null);
@@ -84,6 +86,8 @@ function Modulo({ capo, genere, onFatto }: { capo?: Capo; genere: Genere; onFatt
       nome: nome.trim() || undefined,
       occasioni,
       impermeabile,
+      preferito: preferito || undefined,
+      daLavare: daLavare || undefined,
       foto,
     };
     try {
@@ -215,6 +219,21 @@ function Modulo({ capo, genere, onFatto }: { capo?: Capo; genere: Genere; onFatt
           <span>Ripara dalla pioggia</span>
         </label>
       )}
+
+      <label className="interruttore">
+        <input type="checkbox" checked={preferito} onChange={(e) => setPreferito(e.target.checked)} />
+        <span>Tra i preferiti (lo propongo più spesso)</span>
+      </label>
+      <label className="interruttore">
+        <input type="checkbox" checked={daLavare} onChange={(e) => setDaLavare(e.target.checked)} />
+        <span>Da lavare (non lo propongo finché non lo togli)</span>
+      </label>
+      {capo?.usi ? (
+        <p className="nota-piccola">
+          Messo {capo.usi === 1 ? 'una volta' : `${capo.usi} volte`}
+          {capo.ultimoUso && `, l'ultima il ${new Date(`${capo.ultimoUso}T12:00:00Z`).toLocaleDateString('it-IT', { day: 'numeric', month: 'long', timeZone: 'UTC' })}`}.
+        </p>
+      ) : null}
 
       <button type="submit" className="bottone primario largo" disabled={lavoro}>
         {capo ? 'Salva modifiche' : "Aggiungi all'armadio"}

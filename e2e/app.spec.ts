@@ -43,13 +43,18 @@ test.describe('Che mi metto?', () => {
 
     await page.getByRole('button', { name: 'Palestra', exact: true }).click();
     await expect(capi.getByText('Pantaloni della tuta')).toBeVisible();
-    await expect(page.getByText('In borsa')).toBeVisible();
-    await expect(page.getByText('Asciugamano')).toBeVisible();
+    const idea = page.getByRole('tabpanel').first();
+    await expect(idea.getByText('In borsa')).toBeVisible();
+    await expect(idea.getByText('Asciugamano')).toBeVisible();
 
+    // Tre idee da sfogliare col dito: la seconda è diversa dalla prima.
+    await page.getByRole('button', { name: 'Casual', exact: true }).click();
     const prima = await capi.textContent();
-    await page.getByRole('button', { name: 'Altra idea' }).click();
-    await page.getByRole('button', { name: 'Altra idea' }).click();
+    await expect(page.getByRole('tablist', { name: 'Idee di outfit' }).getByRole('tab')).toHaveCount(3);
+    await page.getByRole('tablist', { name: 'Idee di outfit' }).getByRole('tab').nth(1).click();
     await expect(capi).not.toHaveText(prima ?? '');
+    await page.getByRole('button', { name: 'Altre idee' }).click();
+    await expect(page.getByRole('tab', { name: /Nuova idea/ })).toHaveAttribute('aria-selected', 'true');
   });
 
   test('settimana: giorno di pioggia e impegno serale', async ({ page }) => {
@@ -57,7 +62,7 @@ test.describe('Che mi metto?', () => {
     await primoAvvio(page);
     await page.getByRole('link', { name: 'Settimana' }).click();
     await page.getByRole('tab', { name: /Sab/ }).click();
-    await expect(page.getByText(/Pioggia probabile \(80%\)/)).toBeVisible();
+    await expect(page.getByRole('tabpanel').first().getByText(/Pioggia probabile \(80%\)/)).toBeVisible();
     await expect(page.getByRole('list', { name: 'Accessori' }).first()).toContainText('Ombrello');
 
     await page.getByRole('button', { name: 'Aggiungi', exact: true }).click();
@@ -100,7 +105,7 @@ test.describe('Che mi metto?', () => {
     const capi = page.getByRole('list', { name: 'Capi consigliati' });
     await expect(capi.getByText('Maglione della nonna')).toBeVisible();
     await expect(capi.getByText('Tuo')).toBeVisible();
-    await expect(page.getByText(/Nel tuo armadio non ho trovato/)).toBeVisible();
+    await expect(page.getByRole('tabpanel').first().getByText(/Nel tuo armadio non ho trovato/)).toBeVisible();
   });
 
   test('profilo: cambio genere e scarico il backup', async ({ page }) => {

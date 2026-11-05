@@ -53,8 +53,14 @@ export function PaginaArmadio() {
               return (
                 <li key={c.id}>
                   <button type="button" onClick={() => setModulo({ aperto: true, capo: c })} aria-label={`${nome}, ${descrizione}`}>
-                    <div className="tessera-figura">
+                    <div className={`tessera-figura${c.daLavare ? ' da-lavare' : ''}`}>
                       <Figura pezzo={{ categoria: c.categoria, colore: c.colore, fantasia: c.fantasia, colore2: c.colore2, nome, capo: c }} />
+                      {c.preferito && (
+                        <span className="etichetta-preferito" aria-label="preferito">
+                          ♥
+                        </span>
+                      )}
+                      {c.daLavare && <span className="etichetta-lavare">Da lavare</span>}
                     </div>
                     <span className="nome-capo">{nome}</span>
                     <span className="tessera-colore">

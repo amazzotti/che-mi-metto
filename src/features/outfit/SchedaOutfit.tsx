@@ -1,5 +1,4 @@
 import { useEffect, useMemo } from 'react';
-import { IconaMescola } from '../../shared/ui/Icone';
 import { categoria } from './catalogo';
 import type { Outfit, Pezzo } from './motore';
 import { Sagoma } from './Sagoma';
@@ -61,11 +60,10 @@ function Tessera({ pezzo, piccola }: { pezzo: Pezzo; piccola?: boolean }) {
 
 interface Props {
   outfit: Outfit;
-  onAltraIdea?: () => void;
   compatta?: boolean;
 }
 
-export function SchedaOutfit({ outfit, onAltraIdea, compatta }: Props) {
+export function SchedaOutfit({ outfit, compatta }: Props) {
   const mancanti = outfit.mancanti.map((p) => categoria(p.categoria).nome.toLowerCase());
   return (
     <div className={`outfit${compatta ? ' compatto' : ''}`} data-fascia={outfit.fascia}>
@@ -115,11 +113,6 @@ export function SchedaOutfit({ outfit, onAltraIdea, compatta }: Props) {
             <li key={m}>{m}</li>
           ))}
         </ul>
-      )}
-      {onAltraIdea && (
-        <button type="button" className="bottone secondario largo" onClick={onAltraIdea}>
-          <IconaMescola /> Altra idea
-        </button>
       )}
     </div>
   );
