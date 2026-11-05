@@ -42,8 +42,13 @@ iPhone, senza passare dall'App Store.
 - 📅 **Impegni e occasioni**: casual, lavoro, appuntamento, aperitivo, uscita elegante, palestra. Ogni impegno ha il suo
   outfit calcolato sul meteo **di quell'ora** (la cena delle 20:30 non è il pranzo delle 13). Per la palestra c'è anche la
   lista di cosa mettere in borsa.
-- 🧥 **Armadio digitale**: carichi i capi uno per uno, con una foto o scegliendo solo tipo e colore. Il colore viene
-  riconosciuto dalla foto. I consigli usano i tuoi vestiti, abbinano i colori e segnalano cosa manca.
+- 🧥 **Armadio digitale**: carichi i capi uno per uno, con una foto o scegliendo solo tipo e colore. **Lo sfondo della
+  foto viene tolto in automatico**, sul telefono e senza servizi esterni, e il colore viene riconosciuto dal capo. I
+  consigli usano i tuoi vestiti, abbinano i colori e segnalano cosa manca.
+- 💾 **Outfit salvati e diario**: salvi le idee che ti piacciono e "Lo metto oggi" tiene il diario di cosa hai indossato e
+  quando. Ogni outfit si può **condividere come collage** (WhatsApp, Instagram…).
+- 🧳 **Valigia**: scegli meta e date, l'app guarda il meteo della destinazione (fino a due settimane) e prepara la lista
+  dei vestiti da portare, con le quantità, le occasioni speciali e le cose da non dimenticare.
 - 🎨 **Sagome disegnate a mano, diverse per donna e uomo**: t-shirt aderente od oversize, blazer sciancrato, cappotto a
   vestaglia, jeans skinny o a zampa, gonna a tubino o a ruota, vestito a sottoveste… Ogni capo ha il suo colore e, se vuoi,
   una fantasia (righe, quadri, pois, fiori) con un secondo colore. Nelle idee generiche l'app aggiunge da sola un capo
@@ -110,6 +115,12 @@ licenze, è in [docs/ISPIRAZIONI.md](docs/ISPIRAZIONI.md).
   <img src="docs/screenshots/12-aggiunta-rapida.png" width="24%" alt="Aggiunta rapida dei capi" />
 </p>
 <p align="center">
+  <img src="docs/screenshots/15-outfit.png" width="24%" alt="Outfit salvati, diario e valigia" />
+  <img src="docs/screenshots/16-valigia.png" width="24%" alt="Lista della valigia con il meteo della meta" />
+  <img src="docs/screenshots/05-impegno-elegante.png" width="24%" alt="Impegno serale con outfit elegante" />
+  <img src="docs/screenshots/06-armadio.png" width="24%" alt="Armadio digitale" />
+</p>
+<p align="center">
   <img src="docs/screenshots/03-outfit-armadio.png" width="24%" alt="Outfit con capi dell'armadio e capi mancanti" />
   <img src="docs/screenshots/14-uomo-elegante.png" width="24%" alt="Uscita elegante da uomo" />
   <img src="docs/screenshots/04-settimana.png" width="24%" alt="Previsioni della settimana" />
@@ -146,8 +157,9 @@ src/
 ├─ app/                 guscio dell'app: navigazione, primo avvio, stile
 ├─ features/
 │  ├─ meteo/            Open-Meteo, posizione, stagioni, icone meteo
+│  ├─ raccolta/         outfit salvati, diario, collage da condividere, valigia
 │  ├─ outfit/           catalogo dei capi, motore, colori, sagome SVG
-│  ├─ armadio/          capi, foto (ridimensionamento e colore dominante)
+│  ├─ armadio/          capi, foto (ridimensionamento, sfondo tolto, colore), aggiunta rapida, statistiche
 │  ├─ impegni/          impegni del giorno
 │  ├─ giornata/         pagine Oggi e Settimana
 │  └─ profilo/          profilo, backup, privacy
@@ -211,6 +223,8 @@ the day** (work, date, cocktails, formal event, gym) and, optionally, **your own
 - Gender-specific hand-drawn silhouettes with several models per garment, daily-changing suggestions, a **lock** to keep
   a piece fixed while browsing ideas, "style this piece" from the wardrobe, a quick-add grid, and a daily "how was
   yesterday?" check that self-calibrates the temperature offset.
+- On-device background removal for clothing photos (border-seeded flood fill, no model download), saved outfits, a wear
+  diary, shareable outfit collages rendered on canvas, and a trip packing list built from the destination's 16-day forecast.
 - Wardrobe extras inspired by open-source projects (see [docs/ISPIRAZIONI.md](docs/ISPIRAZIONI.md)): favourites, "in the
   laundry" items excluded, and an "I'm wearing it today" button that tracks wear count and avoids repeats.
 - Privacy by design: no account, no server, everything stays in IndexedDB on the phone, with JSON backup/restore.

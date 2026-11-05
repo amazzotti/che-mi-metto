@@ -137,6 +137,24 @@ test('anteprime per il README', async ({ page }) => {
   await foto(page, '12-aggiunta-rapida');
   await page.keyboard.press('Escape');
 
+  // Outfit salvati, diario e valigia.
+  await page.getByRole('link', { name: 'Oggi' }).click();
+  await page.getByRole('button', { name: '♡ Salva' }).first().click();
+  await page.getByRole('button', { name: 'Lo metto oggi' }).first().click();
+  await page.getByRole('tablist', { name: 'Idee di outfit' }).getByRole('tab').nth(1).click();
+  await page.getByRole('button', { name: '♡ Salva' }).first().click();
+  await page.getByRole('link', { name: 'Outfit' }).click();
+  await foto(page, '15-outfit');
+  await page.getByRole('button', { name: 'Prepara la valigia' }).click();
+  const valigia = page.getByRole('dialog', { name: 'Prepara la valigia' });
+  await valigia.getByRole('searchbox', { name: 'Cerca la città' }).fill('Rimini');
+  await valigia.getByRole('button', { name: /Rimini\s*Emilia-Romagna/ }).click();
+  await valigia.getByRole('button', { name: 'Una serata elegante' }).click();
+  await valigia.getByRole('button', { name: 'Prepara la valigia' }).click();
+  await valigia.getByRole('list', { name: 'Capi da mettere in valigia' }).waitFor();
+  await foto(page, '16-valigia');
+  await page.keyboard.press('Escape');
+
   await page.emulateMedia({ colorScheme: 'dark' });
   await page.getByRole('link', { name: 'Oggi' }).click();
   await page.getByRole('button', { name: 'Elegante', exact: true }).click();

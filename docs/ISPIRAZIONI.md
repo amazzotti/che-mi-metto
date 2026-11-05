@@ -28,6 +28,20 @@ store e recensioni.
 | [Stylebook](https://stylebookapp.com/features.html) | Stato del capo (pulito, da lavare, prestato), statistiche "mai usati" e "più usati" | Capi **da lavare** e **statistiche** |
 | [Cladwell](https://apps.apple.com/us/app/cladwell/id1140550878) | Armadio creato scegliendo da **immagini già pronte**, una nota sul perché di ogni outfit | **Aggiunta rapida** con le sagome |
 | [Weather Outfit](https://apps.apple.com/app/id6769089874), WTWT | Dopo ogni giornata un tocco "freddo / giusto / caldo" che regola le proposte | **"Ieri com'era?"** |
+| Whering, Stylebook, Indyx | **Sfondo tolto in automatico** dalla foto del capo | Rimozione dello sfondo sul telefono, senza servizi esterni |
+| Whering (lookbook), Stylebook (calendario) | Outfit salvati in raccolte, calendario di cosa hai indossato, collage da condividere | **Outfit salvati**, **diario**, **collage** |
+| Acloset, Whering | Lista per la valigia dal meteo della destinazione | **Valigia** con il meteo a 16 giorni di Open-Meteo |
+
+Tra i progetti open source su GitHub, [Libre-Closet](https://github.com/Lazztech/Libre-Closet) (AGPL-3.0) ha un calendario degli
+outfit con il meteo: ne ho preso solo l'idea, il codice è scritto da zero.
+
+### Come tolgo lo sfondo senza intelligenza artificiale
+
+Le app commerciali usano modelli di intelligenza artificiale sui loro server. Qui l'obiettivo era costo zero e niente dati
+fuori dal telefono, quindi ho usato un algoritmo classico ([`src/features/armadio/sfondo.ts`](../src/features/armadio/sfondo.ts)):
+i colori lungo i bordi della foto sono lo sfondo; partendo dai bordi si "allagano" i pixel di colore simile; quello che
+resta è il capo, che viene ritagliato con un bordo appena sfumato. Funziona bene con un fondo uniforme (letto, pavimento,
+parete) e, se non ci riesce, la foto resta com'era. Si può sempre tornare alla foto originale con un tocco.
 
 Il difetto più citato nelle recensioni di queste app è la **ripetitività** (e capi sbagliati per il meteo): per questo le
 idee cambiano ogni giorno, si scelgono diverse tra loro e il motore ha soglie di temperatura verificate dai test.
