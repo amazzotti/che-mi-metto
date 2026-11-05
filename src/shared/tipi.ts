@@ -56,6 +56,8 @@ export interface Capo {
   usi?: number;
   /** Ultimo giorno in cui l'hai messo, "AAAA-MM-GG". */
   ultimoUso?: string;
+  /** La foto è il capo ritagliato, senza sfondo. */
+  sfondoTolto?: boolean;
   /** Foto già ridimensionata (JPEG). Assente: si usa la sagoma colorata. */
   foto?: Blob;
   creato: number;

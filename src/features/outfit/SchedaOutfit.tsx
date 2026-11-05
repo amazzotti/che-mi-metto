@@ -19,7 +19,10 @@ type DatiFigura = Pick<Pezzo, 'categoria' | 'colore' | 'nome' | 'capo'> & Partia
 
 export function Figura({ pezzo, className }: { pezzo: DatiFigura; className?: string }) {
   const url = useUrlFoto(pezzo.capo?.foto);
-  if (url) return <img src={url} alt={pezzo.nome} className={`figura-foto ${className ?? ''}`} />;
+  if (url) {
+    const classe = `figura-foto${pezzo.capo?.sfondoTolto ? ' ritagliata' : ''} ${className ?? ''}`;
+    return <img src={url} alt={pezzo.nome} className={classe} />;
+  }
   return (
     <Sagoma
       id={categoria(pezzo.categoria).sagoma}
