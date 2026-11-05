@@ -5,6 +5,7 @@ import { Scelta } from '../shared/ui/Scelta';
 import { SceltaPosizione } from '../features/meteo/SceltaPosizione';
 import { GENERI, SENSIBILITA } from '../features/profilo/PaginaProfilo';
 import { salvaProfilo } from '../features/profilo/profilo';
+import { Firma } from './Firma';
 import { Logo } from './Logo';
 
 /** Primo avvio: tre domande e si parte. */
@@ -57,6 +58,7 @@ export function Benvenuto() {
         Iniziamo
       </button>
       <p className="nota-piccola centrata">Tutto resta sul tuo telefono. Nessun account.</p>
+      <Firma />
     </main>
   );
 }

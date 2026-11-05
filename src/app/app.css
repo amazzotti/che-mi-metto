@@ -1780,3 +1780,12 @@ details.motivi ul {
 .valigia-elenco.semplice label {
   padding: 8px 10px;
 }
+
+/* ---------- Firma ---------- */
+.firma {
+  margin-top: 4px;
+  text-align: center;
+  color: var(--tenue);
+  font-size: 0.75rem;
+  opacity: 0.85;
+}
