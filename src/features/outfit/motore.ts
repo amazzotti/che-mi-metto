@@ -15,6 +15,7 @@ import { infoStagione } from '../meteo/stagione';
 import type { CategoriaId, Slot } from './catalogo';
 import { categoria } from './catalogo';
 import { armonia, colorePerNome, nomeColore } from './colori';
+import { descriviColore, type Fantasia, fantasiePossibili, secondoColore } from './fantasie';
 import { palette } from './palette';
 
 export type Fascia = 'gelo' | 'freddo' | 'fresco' | 'mite' | 'tiepido' | 'caldo' | 'torrido';
@@ -165,6 +166,9 @@ export interface Pezzo {
   categoria: CategoriaId;
   nome: string;
   colore: string;
+  fantasia?: Fantasia;
+  colore2?: string;
+  /** Descrizione del colore, es. "bianco a righe blu navy". */
   nomeColore: string;
   /** Il capo dell'armadio scelto, se c'è. */
   capo?: Capo;
@@ -227,6 +231,15 @@ function scegliColore(lista: string[], variante: number, evita: string[] = []): 
   const liberi = lista.filter((c) => !evita.includes(c));
   const fonte = liberi.length > 0 ? liberi : lista;
   return fonte[variante % fonte.length];
+}
+
+function coloriDelCapo(capo: Capo): Pick<Pezzo, 'colore' | 'fantasia' | 'colore2' | 'nomeColore'> {
+  return {
+    colore: capo.colore,
+    fantasia: capo.fantasia,
+    colore2: capo.colore2,
+    nomeColore: descriviColore(capo.colore, capo.fantasia, capo.colore2),
+  };
 }
 
 function eta(genere: Genere, maschile: string, femminile: string): string {
@@ -341,8 +354,7 @@ export function proponiOutfit(r: RichiestaOutfit): Outfit {
           slot,
           categoria: capo.categoria,
           nome: capo.nome || categoria(capo.categoria).nome,
-          colore: capo.colore,
-          nomeColore: nomeColore(capo.colore),
+          ...coloriDelCapo(capo),
           capo,
           nota,
         });
@@ -396,7 +408,7 @@ export function proponiOutfit(r: RichiestaOutfit): Outfit {
     const mio = armadio.find((x) => x.categoria === id);
     accessori.push(
       mio
-        ? { slot: 'accessorio', categoria: id, nome: mio.nome || categoria(id).nome, colore: mio.colore, nomeColore: nomeColore(mio.colore), capo: mio, nota }
+        ? { slot: 'accessorio', categoria: id, nome: mio.nome || categoria(id).nome, ...coloriDelCapo(mio), capo: mio, nota }
         : { slot: 'accessorio', categoria: id, nome: categoria(id).nome, colore, nomeColore: nomeColore(colore), nota },
     );
   };
@@ -410,6 +422,23 @@ export function proponiOutfit(r: RichiestaOutfit): Outfit {
   if (t >= 25 && c.uv >= 5 && (occasione === 'casual' || occasione === 'sport')) accessorio('cappellino', pal.chiari[0]);
   if (occasione === 'sport') accessorio('borsa-sport', pal.neutri[0]);
   else if (genere === 'donna') accessorio('borsa', occasione === 'elegante' ? pal.neutri[0] : pal.neutri[(variante + 2) % pal.neutri.length]);
+
+  // --- Un tocco di fantasia ---
+  // Al massimo un capo a righe, quadri, pois o fiori per outfit, scelto tra quelli proposti
+  // (i tuoi capi restano come sono). Ogni tre idee una è tutta in tinta unita.
+  const haGiaFantasia = [...pezzi, ...accessori].some((p) => p.fantasia && p.fantasia !== 'unita');
+  if (!haGiaFantasia && variante % 3 !== 2) {
+    const ordine: Slot[] = ['intero', 'base', 'sotto', 'strato', 'accessorio'];
+    const generici = ordine.flatMap((s) => [...pezzi, ...accessori].filter((p) => p.slot === s && !p.capo));
+    for (const p of generici) {
+      const possibili = fantasiePossibili(p.categoria, stagione.stagione, occasione);
+      if (possibili.length === 0) continue;
+      p.fantasia = possibili[variante % possibili.length];
+      p.colore2 = secondoColore(p.colore, pal, variante);
+      p.nomeColore = descriviColore(p.colore, p.fantasia, p.colore2);
+      break;
+    }
+  }
 
   if (occasione === 'sport') {
     daPortare.push(

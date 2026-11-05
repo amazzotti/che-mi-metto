@@ -2,6 +2,7 @@ import { db } from '../../shared/db';
 import type { Capo, Impegno, Profilo } from '../../shared/tipi';
 import { elencoCapi, inSalvato } from '../armadio/armadio';
 import { esisteCategoria } from '../outfit/catalogo';
+import { eFantasia } from '../outfit/fantasie';
 
 type CapoEsportato = Omit<Capo, 'foto'> & { foto?: string };
 
@@ -59,7 +60,13 @@ export function validaBackup(dati: unknown): DatiBackup {
     throw new Error('Questo file non è un backup di "Che mi metto?"');
   }
   for (const c of d.capi) {
-    if (typeof c?.id !== 'string' || !esisteCategoria(String(c.categoria)) || !/^#[0-9a-f]{6}$/i.test(String(c.colore))) {
+    if (
+      typeof c?.id !== 'string' ||
+      !esisteCategoria(String(c.categoria)) ||
+      !/^#[0-9a-f]{6}$/i.test(String(c.colore)) ||
+      (c.fantasia !== undefined && !eFantasia(c.fantasia)) ||
+      (c.colore2 !== undefined && !/^#[0-9a-f]{6}$/i.test(String(c.colore2)))
+    ) {
       throw new Error('Il backup contiene un capo non valido');
     }
   }

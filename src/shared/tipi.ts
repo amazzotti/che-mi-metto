@@ -1,4 +1,5 @@
 import type { CategoriaId } from '../features/outfit/catalogo';
+import type { Fantasia } from '../features/outfit/fantasie';
 
 export type Genere = 'uomo' | 'donna';
 export type Sensibilita = 'freddoloso' | 'normale' | 'caloroso';
@@ -36,6 +37,10 @@ export interface Capo {
   categoria: CategoriaId;
   /** Colore principale in esadecimale, es. "#1f2a44". */
   colore: string;
+  /** Righe, quadri, pois o fiori; assente = tinta unita. */
+  fantasia?: Fantasia;
+  /** Secondo colore della fantasia. */
+  colore2?: string;
   nome?: string;
   occasioni: Occasione[];
   impermeabile: boolean;

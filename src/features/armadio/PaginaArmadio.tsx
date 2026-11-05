@@ -4,8 +4,8 @@ import type { Capo } from '../../shared/tipi';
 import { IconaPiu } from '../../shared/ui/Icone';
 import { Scelta } from '../../shared/ui/Scelta';
 import { categoria, NOMI_SLOT, ORDINE_SLOT, type Slot } from '../outfit/catalogo';
-import { nomeColore } from '../outfit/colori';
-import { Figura } from '../outfit/SchedaOutfit';
+import { descriviColore } from '../outfit/fantasie';
+import { Figura, PallinoColore } from '../outfit/SchedaOutfit';
 import { FoglioCapo } from './FoglioCapo';
 
 export function PaginaArmadio() {
@@ -49,16 +49,17 @@ export function PaginaArmadio() {
           <ul className="griglia-armadio">
             {visibili.map((c) => {
               const nome = c.nome || categoria(c.categoria).nome;
+              const descrizione = descriviColore(c.colore, c.fantasia, c.colore2);
               return (
                 <li key={c.id}>
-                  <button type="button" onClick={() => setModulo({ aperto: true, capo: c })} aria-label={`${nome}, ${nomeColore(c.colore)}`}>
+                  <button type="button" onClick={() => setModulo({ aperto: true, capo: c })} aria-label={`${nome}, ${descrizione}`}>
                     <div className="tessera-figura">
-                      <Figura pezzo={{ categoria: c.categoria, colore: c.colore, nome, capo: c }} />
+                      <Figura pezzo={{ categoria: c.categoria, colore: c.colore, fantasia: c.fantasia, colore2: c.colore2, nome, capo: c }} />
                     </div>
                     <span className="nome-capo">{nome}</span>
                     <span className="tessera-colore">
-                      <i style={{ background: c.colore }} aria-hidden="true" />
-                      {nomeColore(c.colore)}
+                      <PallinoColore colore={c.colore} colore2={c.colore2} fantasia={c.fantasia} />
+                      {descrizione}
                     </span>
                   </button>
                 </li>

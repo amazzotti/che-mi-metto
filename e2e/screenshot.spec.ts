@@ -11,10 +11,18 @@ const CARTELLA = fileURLToPath(new URL('../docs/screenshots/', import.meta.url))
 const FOTO = readFileSync(new URL('./fixture/maglione.jpg', import.meta.url)).toString('base64');
 
 let n = 0;
-const capo = (categoria: string, colore: string, nome?: string, occasioni = ['casual', 'lavoro', 'appuntamento', 'aperitivo', 'elegante'], foto?: string) => ({
+const capo = (
+  categoria: string,
+  colore: string,
+  nome?: string,
+  occasioni = ['casual', 'lavoro', 'appuntamento', 'aperitivo', 'elegante'],
+  foto?: string,
+  fantasia?: { fantasia: string; colore2: string },
+) => ({
   id: `capo-${++n}`,
   categoria,
   colore,
+  ...fantasia,
   nome,
   occasioni,
   impermeabile: categoria === 'trench',
@@ -31,14 +39,15 @@ const BACKUP = {
     capo('maglione', '#762030', 'Maglione della nonna', ['casual', 'lavoro', 'appuntamento'], FOTO),
     capo('jeans', '#4a6b8a', 'Jeans a vita alta'),
     capo('gonna-lunga', '#c19a6b', 'Gonna midi plissé'),
-    capo('blusa', '#efe8dc', 'Blusa in seta'),
+    capo('blusa', '#efe8dc', 'Blusa in seta', undefined, undefined, { fantasia: 'pois', colore2: '#6d1a2c' }),
+    capo('camicia', '#ffffff', 'Camicia a righe', ['casual', 'lavoro', 'aperitivo'], undefined, { fantasia: 'righe', colore2: '#1f2a44' }),
     capo('dolcevita', '#151515'),
     capo('trench', '#d2bc98', 'Trench beige'),
     capo('cappotto', '#1f2a44'),
     capo('stivaletti', '#6b4a32'),
     capo('sneakers', '#ffffff'),
     capo('vestito', '#6d1a2c', 'Vestito bordeaux', ['appuntamento', 'elegante', 'aperitivo']),
-    capo('sciarpa', '#c9971c'),
+    capo('sciarpa', '#3a3d42', 'Sciarpa scozzese', undefined, undefined, { fantasia: 'quadri', colore2: '#c0392b' }),
     capo('borsa', '#3a3d42'),
   ],
   impegni: [
@@ -84,6 +93,12 @@ test('anteprime per il README', async ({ page }) => {
   await foto(page, '01-benvenuto');
 
   await primoAvvio(page);
+  await page.evaluate(() => localStorage.setItem('banner-installa-chiuso', '1'));
+  await page.reload();
+  await page.getByRole('heading', { name: 'Outfit per oggi' }).waitFor();
+  await mostraDallAlto(page, '.outfit');
+  await foto(page, '10-idee-generiche');
+
   await caricaBackup(page);
   // Il banner per installare su iPhone lo nascondiamo nelle anteprime.
   await page.evaluate(() => localStorage.setItem('banner-installa-chiuso', '1'));

@@ -212,6 +212,40 @@ describe('outfit senza armadio', () => {
     }
   });
 
+  it('aggiunge al massimo un capo fantasia, con un secondo colore che stacca', () => {
+    let conFantasia = 0;
+    for (const genere of ['uomo', 'donna'] as const) {
+      for (const t of [5, 12, 18, 23, 28]) {
+        for (let v = 0; v < 6; v++) {
+          const o = proponiOutfit(richiesta(t, { genere, variante: v, data: '2026-05-10' }));
+          const fantasia = [...o.pezzi, ...o.accessori].filter((p) => p.fantasia);
+          expect(fantasia.length).toBeLessThanOrEqual(1);
+          if (v % 3 === 2) expect(fantasia).toHaveLength(0);
+          for (const p of fantasia) {
+            conFantasia++;
+            expect(p.colore2).toMatch(/^#[0-9a-f]{6}$/);
+            expect(p.colore2).not.toBe(p.colore);
+            expect(p.nomeColore).toMatch(/ a (righe|quadri|pois|fiori) /);
+          }
+        }
+      }
+    }
+    expect(conFantasia).toBeGreaterThan(20);
+  });
+
+  it('fantasie adatte a stagione e occasione', () => {
+    // In inverno niente fiori; per la palestra niente fantasie.
+    for (let v = 0; v < 6; v++) {
+      const inverno = proponiOutfit(richiesta(6, { genere: 'donna', variante: v, data: '2026-01-15' }));
+      expect([...inverno.pezzi, ...inverno.accessori].some((p) => p.fantasia === 'fiori')).toBe(false);
+      const palestra = proponiOutfit(richiesta(18, { occasione: 'sport', variante: v }));
+      expect(palestra.pezzi.some((p) => p.fantasia)).toBe(false);
+    }
+    // Un vestito leggero in estate può essere a fiori.
+    const estate = [0, 1, 3, 4].map((v) => proponiOutfit(richiesta(27, { genere: 'donna', variante: v, data: '2026-07-10' })));
+    expect(estate.some((o) => o.pezzi.some((p) => p.fantasia === 'fiori' || p.fantasia === 'righe'))).toBe(true);
+  });
+
   it('i jeans sono color denim', () => {
     const o = proponiOutfit(richiesta(12));
     const jeans = o.pezzi.find((p) => p.categoria === 'jeans');
@@ -256,6 +290,14 @@ describe('outfit con armadio', () => {
     const conMocassini = [...armadio, capo('mocassini', '#151515')];
     const o = proponiOutfit(richiesta(12, { armadio: conMocassini, occasione: 'appuntamento' }, { probPioggia: 90 }));
     expect(categoria(o.pezzi.find((p) => p.slot === 'scarpe')!.categoria).pioggia).toBe(true);
+  });
+
+  it('mantiene la fantasia dei capi caricati e non ne aggiunge altre', () => {
+    const conRighe = [capo('camicia', '#ffffff', { fantasia: 'righe', colore2: '#1f2a44' }), capo('chino', '#c19a6b'), capo('sneakers', '#ffffff')];
+    const o = proponiOutfit(richiesta(22, { armadio: conRighe }));
+    const camicia = o.pezzi.find((p) => p.categoria === 'camicia')!;
+    expect(camicia.nomeColore).toBe('bianco a righe blu navy');
+    expect([...o.pezzi, ...o.accessori].filter((p) => p.fantasia)).toHaveLength(1);
   });
 
   it("rispetta le occasioni scelte per ogni capo", () => {

@@ -15,6 +15,19 @@ describe('sagome', () => {
     expect(svg.querySelector('path[fill="#c19a6b"]')).not.toBeNull();
   });
 
+  it('riempie il capo con la fantasia scelta', () => {
+    for (const fantasia of ['righe', 'quadri', 'pois', 'fiori'] as const) {
+      const { container, unmount } = render(<Sagoma id="camicia" colore="#ffffff" fantasia={fantasia} colore2="#1f2a44" />);
+      const motivo = container.querySelector('pattern');
+      expect(motivo, fantasia).not.toBeNull();
+      expect(container.querySelector(`path[fill="url(#${motivo!.id})"]`)).not.toBeNull();
+      expect(container.querySelector('svg')?.getAttribute('data-fantasia')).toBe(fantasia);
+      unmount();
+    }
+    const { container } = render(<Sagoma id="camicia" colore="#ffffff" fantasia="unita" colore2="#1f2a44" />);
+    expect(container.querySelector('pattern')).toBeNull();
+  });
+
   it('senza titolo è decorativa', () => {
     const { container } = render(<Sagoma id="sciarpa" colore="#151515" />);
     expect(container.querySelector('svg')?.getAttribute('aria-hidden')).toBe('true');

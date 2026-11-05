@@ -78,6 +78,10 @@ describe('backup', () => {
     const base = await datiBackup();
     expect(() => validaBackup({ ...base, capi: [{ id: 'x', categoria: 'astronave', colore: '#000000' }] })).toThrow('capo non valido');
     expect(() => validaBackup({ ...base, impegni: [{ id: 'x', data: 'ieri', ora: '10:00' }] })).toThrow('impegno non valido');
+    expect(() => validaBackup({ ...base, capi: [{ id: 'x', categoria: 'camicia', colore: '#ffffff', fantasia: 'leopardato' }] })).toThrow(
+      'capo non valido',
+    );
+    expect(validaBackup({ ...base, capi: [{ id: 'x', categoria: 'camicia', colore: '#ffffff', fantasia: 'righe', colore2: '#1f2a44' }] }).capi).toHaveLength(1);
     expect(validaBackup(base).versione).toBe(1);
   });
 });
