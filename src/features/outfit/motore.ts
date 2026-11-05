@@ -54,58 +54,58 @@ const PER_FASCIA: Record<Fascia, Tabella> = {
   gelo: {
     base: ['maglia', 'dolcevita', 'camicia', 'blusa', 'maglia-tecnica'],
     strato: ['maglione', 'felpa', 'cardigan', 'maglioncino'],
-    capospalla: ['piumino', 'cappotto'],
-    sotto: ['jeans', 'chino', 'pantaloni-eleganti', 'pantaloni-tuta', 'leggings', 'gonna-lunga'],
+    capospalla: ['piumino', 'cappotto', 'parka'],
+    sotto: ['jeans', 'chino', 'pantaloni-velluto', 'pantaloni-eleganti', 'pantaloni-tuta', 'leggings', 'gonna-lunga', 'cargo'],
     intero: ['vestito'],
     scarpe: ['stivali', 'stivaletti', 'sneakers', 'scarpe-eleganti', 'running', 'mocassini', 'decollete'],
   },
   freddo: {
     base: ['maglia', 'dolcevita', 'camicia', 'blusa', 'tshirt', 'polo', 'maglia-tecnica'],
-    strato: ['maglione', 'maglioncino', 'felpa', 'cardigan'],
-    capospalla: ['cappotto', 'piumino', 'giubbotto', 'trench'],
-    sotto: ['jeans', 'chino', 'pantaloni-eleganti', 'pantaloni-tuta', 'leggings', 'gonna-lunga', 'gonna'],
+    strato: ['maglione', 'maglioncino', 'felpa', 'cardigan', 'gilet'],
+    capospalla: ['cappotto', 'piumino', 'parka', 'giubbotto', 'trench'],
+    sotto: ['jeans', 'chino', 'pantaloni-velluto', 'pantaloni-eleganti', 'cargo', 'pantaloni-tuta', 'leggings', 'gonna-lunga', 'gonna'],
     intero: ['vestito'],
     scarpe: ['stivali', 'stivaletti', 'sneakers', 'scarpe-eleganti', 'mocassini', 'decollete', 'running'],
   },
   fresco: {
     base: ['camicia', 'maglia', 'dolcevita', 'tshirt', 'polo', 'blusa', 'top', 'maglia-tecnica'],
-    strato: ['maglioncino', 'cardigan', 'felpa', 'maglione'],
-    capospalla: ['trench', 'giubbotto', 'giacca-jeans', 'blazer', 'impermeabile', 'cappotto'],
-    sotto: ['jeans', 'chino', 'pantaloni-eleganti', 'gonna', 'gonna-lunga', 'leggings', 'pantaloni-tuta'],
-    intero: ['vestito'],
+    strato: ['maglioncino', 'cardigan', 'felpa', 'maglione', 'gilet'],
+    capospalla: ['trench', 'giubbotto', 'giacca-pelle', 'giacca-jeans', 'blazer', 'impermeabile', 'cappotto'],
+    sotto: ['jeans', 'chino', 'pantaloni-velluto', 'cargo', 'pantaloni-eleganti', 'gonna', 'gonna-lunga', 'leggings', 'pantaloni-tuta'],
+    intero: ['vestito', 'tuta-intera'],
     scarpe: ['sneakers', 'stivaletti', 'stivali', 'mocassini', 'scarpe-eleganti', 'decollete', 'ballerine', 'running'],
   },
   mite: {
     base: ['tshirt', 'camicia', 'polo', 'blusa', 'maglia', 'top', 'maglia-tecnica', 'camicia-lino', 'dolcevita'],
-    strato: ['maglioncino', 'cardigan', 'felpa'],
-    capospalla: ['giacca-jeans', 'blazer', 'trench', 'giubbotto', 'impermeabile'],
-    sotto: ['jeans', 'chino', 'pantaloni-eleganti', 'pantaloni-lino', 'gonna', 'gonna-lunga', 'leggings', 'pantaloni-tuta'],
-    intero: ['vestito', 'vestito-estivo'],
+    strato: ['maglioncino', 'cardigan', 'felpa', 'gilet'],
+    capospalla: ['giacca-jeans', 'blazer', 'giacca-pelle', 'trench', 'giubbotto', 'impermeabile'],
+    sotto: ['jeans', 'chino', 'cargo', 'pantaloni-eleganti', 'palazzo', 'pantaloni-lino', 'gonna', 'gonna-lunga', 'leggings', 'pantaloni-tuta'],
+    intero: ['vestito', 'tuta-intera', 'vestito-estivo'],
     scarpe: ['sneakers', 'mocassini', 'ballerine', 'stivaletti', 'decollete', 'scarpe-eleganti', 'running'],
   },
   tiepido: {
     base: ['tshirt', 'polo', 'camicia', 'camicia-lino', 'blusa', 'top', 'maglia-tecnica', 'canotta'],
     strato: ['cardigan', 'maglioncino'],
     capospalla: ['blazer', 'giacca-jeans', 'impermeabile'],
-    sotto: ['chino', 'jeans', 'pantaloni-lino', 'pantaloni-eleganti', 'gonna', 'gonna-lunga', 'shorts', 'pantaloncini-sport', 'leggings'],
-    intero: ['vestito-estivo', 'vestito'],
-    scarpe: ['sneakers', 'mocassini', 'sandali', 'ballerine', 'decollete', 'scarpe-eleganti', 'running'],
+    sotto: ['chino', 'jeans', 'cargo', 'pantaloni-lino', 'palazzo', 'pantaloni-eleganti', 'gonna', 'gonna-lunga', 'shorts', 'pantaloncini-sport', 'leggings'],
+    intero: ['vestito-estivo', 'vestito', 'tuta-intera'],
+    scarpe: ['sneakers', 'mocassini', 'sandali', 'sandali-tacco', 'ballerine', 'decollete', 'scarpe-eleganti', 'running'],
   },
   caldo: {
     base: ['tshirt', 'polo', 'camicia-lino', 'top', 'canotta', 'blusa', 'maglia-tecnica', 'camicia'],
     strato: [],
     capospalla: ['blazer'],
-    sotto: ['shorts', 'pantaloni-lino', 'gonna', 'gonna-lunga', 'chino', 'pantaloncini-sport', 'pantaloni-eleganti'],
-    intero: ['vestito-estivo', 'vestito'],
-    scarpe: ['sandali', 'sneakers', 'mocassini', 'ballerine', 'decollete', 'scarpe-eleganti', 'running'],
+    sotto: ['shorts', 'pantaloni-lino', 'palazzo', 'gonna', 'gonna-lunga', 'chino', 'pantaloncini-sport', 'pantaloni-eleganti'],
+    intero: ['vestito-estivo', 'vestito', 'tuta-intera'],
+    scarpe: ['sandali', 'sandali-tacco', 'sneakers', 'mocassini', 'ballerine', 'decollete', 'scarpe-eleganti', 'running'],
   },
   torrido: {
     base: ['canotta', 'tshirt', 'top', 'camicia-lino', 'polo', 'maglia-tecnica', 'blusa', 'camicia'],
     strato: [],
     capospalla: [],
-    sotto: ['shorts', 'pantaloni-lino', 'gonna', 'gonna-lunga', 'pantaloncini-sport', 'pantaloni-eleganti'],
+    sotto: ['shorts', 'pantaloni-lino', 'palazzo', 'gonna', 'gonna-lunga', 'pantaloncini-sport', 'pantaloni-eleganti'],
     intero: ['vestito-estivo', 'vestito'],
-    scarpe: ['sandali', 'sneakers', 'mocassini', 'ballerine', 'decollete', 'scarpe-eleganti', 'running'],
+    scarpe: ['sandali', 'sandali-tacco', 'sneakers', 'mocassini', 'ballerine', 'decollete', 'scarpe-eleganti', 'running'],
   },
 };
 
@@ -113,43 +113,43 @@ const PER_FASCIA: Record<Fascia, Tabella> = {
 const PER_OCCASIONE: Record<Occasione, Tabella> = {
   casual: {
     base: ['tshirt', 'maglia', 'camicia', 'polo', 'top', 'canotta', 'camicia-lino', 'blusa', 'dolcevita'],
-    strato: ['felpa', 'maglione', 'cardigan', 'maglioncino'],
-    capospalla: ['giacca-jeans', 'giubbotto', 'piumino', 'impermeabile', 'trench', 'cappotto', 'blazer'],
-    sotto: ['jeans', 'chino', 'shorts', 'gonna', 'pantaloni-lino', 'gonna-lunga', 'leggings'],
-    intero: ['vestito-estivo', 'vestito'],
+    strato: ['felpa', 'maglione', 'cardigan', 'maglioncino', 'gilet'],
+    capospalla: ['giacca-jeans', 'giubbotto', 'piumino', 'parka', 'giacca-pelle', 'impermeabile', 'trench', 'cappotto', 'blazer'],
+    sotto: ['jeans', 'chino', 'cargo', 'shorts', 'gonna', 'pantaloni-lino', 'pantaloni-velluto', 'gonna-lunga', 'leggings'],
+    intero: ['vestito-estivo', 'tuta-intera', 'vestito'],
     scarpe: ['sneakers', 'stivaletti', 'sandali', 'ballerine', 'mocassini', 'stivali'],
   },
   lavoro: {
     base: ['camicia', 'blusa', 'polo', 'dolcevita', 'maglia', 'camicia-lino'],
-    strato: ['maglioncino', 'cardigan', 'maglione'],
-    capospalla: ['blazer', 'cappotto', 'trench', 'piumino', 'impermeabile'],
-    sotto: ['chino', 'pantaloni-eleganti', 'jeans', 'gonna-lunga', 'gonna', 'pantaloni-lino'],
-    intero: ['vestito'],
+    strato: ['maglioncino', 'cardigan', 'gilet', 'maglione'],
+    capospalla: ['blazer', 'cappotto', 'trench', 'piumino', 'parka', 'impermeabile'],
+    sotto: ['chino', 'pantaloni-eleganti', 'palazzo', 'pantaloni-velluto', 'jeans', 'gonna-lunga', 'gonna', 'pantaloni-lino'],
+    intero: ['vestito', 'tuta-intera'],
     scarpe: ['mocassini', 'scarpe-eleganti', 'stivaletti', 'ballerine', 'decollete', 'sneakers', 'stivali'],
   },
   appuntamento: {
     base: ['camicia', 'blusa', 'top', 'dolcevita', 'polo', 'maglia', 'camicia-lino', 'tshirt'],
     strato: ['maglioncino', 'cardigan', 'maglione'],
-    capospalla: ['giubbotto', 'blazer', 'trench', 'cappotto', 'giacca-jeans'],
-    sotto: ['jeans', 'chino', 'gonna', 'gonna-lunga', 'pantaloni-eleganti', 'pantaloni-lino'],
-    intero: ['vestito', 'vestito-estivo'],
-    scarpe: ['stivaletti', 'mocassini', 'decollete', 'stivali', 'sneakers', 'sandali', 'ballerine'],
+    capospalla: ['giacca-pelle', 'giubbotto', 'blazer', 'trench', 'cappotto', 'giacca-jeans'],
+    sotto: ['jeans', 'chino', 'gonna', 'gonna-lunga', 'palazzo', 'pantaloni-eleganti', 'pantaloni-velluto', 'pantaloni-lino'],
+    intero: ['vestito', 'tuta-intera', 'vestito-estivo'],
+    scarpe: ['stivaletti', 'mocassini', 'decollete', 'stivali', 'sandali-tacco', 'sneakers', 'sandali', 'ballerine'],
   },
   aperitivo: {
     base: ['camicia', 'top', 'polo', 'camicia-lino', 'blusa', 'tshirt'],
     strato: ['maglioncino', 'cardigan'],
-    capospalla: ['giubbotto', 'blazer', 'giacca-jeans', 'trench', 'cappotto'],
-    sotto: ['jeans', 'chino', 'gonna', 'pantaloni-lino', 'shorts', 'gonna-lunga'],
-    intero: ['vestito-estivo', 'vestito'],
-    scarpe: ['mocassini', 'sneakers', 'sandali', 'stivaletti', 'decollete', 'ballerine'],
+    capospalla: ['giacca-pelle', 'giubbotto', 'blazer', 'giacca-jeans', 'trench', 'cappotto'],
+    sotto: ['jeans', 'chino', 'gonna', 'palazzo', 'pantaloni-lino', 'shorts', 'gonna-lunga'],
+    intero: ['vestito-estivo', 'tuta-intera', 'vestito'],
+    scarpe: ['mocassini', 'sneakers', 'sandali', 'sandali-tacco', 'stivaletti', 'decollete', 'ballerine'],
   },
   elegante: {
     base: ['camicia', 'blusa', 'top', 'dolcevita'],
-    strato: ['maglioncino', 'cardigan'],
+    strato: ['maglioncino', 'gilet', 'cardigan'],
     capospalla: ['blazer', 'cappotto', 'trench'],
-    sotto: ['pantaloni-eleganti', 'gonna-lunga', 'gonna'],
-    intero: ['vestito'],
-    scarpe: ['scarpe-eleganti', 'decollete', 'stivali', 'stivaletti', 'mocassini', 'sandali'],
+    sotto: ['pantaloni-eleganti', 'palazzo', 'gonna-lunga', 'gonna'],
+    intero: ['vestito', 'tuta-intera'],
+    scarpe: ['scarpe-eleganti', 'decollete', 'sandali-tacco', 'stivali', 'stivaletti', 'mocassini', 'sandali'],
   },
   sport: {
     base: ['maglia-tecnica', 'tshirt', 'canotta'],
@@ -233,6 +233,14 @@ function scegliColore(lista: string[], variante: number, evita: string[] = []): 
   return fonte[variante % fonte.length];
 }
 
+/** Capi a maniche corte o senza maniche: da soli vanno bene solo con il tiepido. */
+const MANICHE_CORTE: CategoriaId[] = ['tshirt', 'polo', 'top', 'canotta', 'maglia-tecnica'];
+
+/** Giorni da "AAAA-MM-GG" a "AAAA-MM-GG". */
+export function giorniTra(da: string, a: string): number {
+  return Math.round((Date.parse(`${a}T12:00:00Z`) - Date.parse(`${da}T12:00:00Z`)) / 86_400_000);
+}
+
 function coloriDelCapo(capo: Capo): Pick<Pezzo, 'colore' | 'fantasia' | 'colore2' | 'nomeColore'> {
   return {
     colore: capo.colore,
@@ -264,9 +272,10 @@ export function proponiOutfit(r: RichiestaOutfit): Outfit {
   const daPortare: string[] = [];
 
   // --- Quali slot servono ---
-  const serveStrato = occasione === 'sport' ? t < 16 : t < 12;
-  let serveCapospalla = t < 15 || (t < 20 && (pioggia || ventoForte || neve));
-  let notaCapospalla: string | undefined;
+  // Soglie sulla temperatura percepita: maglione o felpa sotto i 15°, giacca leggera fino a 18°.
+  const serveStrato = occasione === 'sport' ? t < 16 : t < 15;
+  let serveCapospalla = t < 18 || (t < 20 && (pioggia || ventoForte || neve));
+  let notaCapospalla: string | undefined = t >= 15 && t < 18 ? 'leggera' : undefined;
   if (!serveCapospalla && t < 20 && (c.sera || sbalzo)) {
     serveCapospalla = true;
     notaCapospalla = c.sera ? 'per la sera' : 'da togliere nelle ore calde';
@@ -293,12 +302,21 @@ export function proponiOutfit(r: RichiestaOutfit): Outfit {
   // --- Scelta dei capi ---
   const pezzi: Pezzo[] = [];
   const coloriScelti = () => pezzi.map((p) => p.colore);
+  /** Formalità media dei capi già scelti: gli altri devono restarle vicini. */
+  const formalitaMedia = () =>
+    pezzi.length === 0 ? undefined : pezzi.reduce((s, p) => s + categoria(p.categoria).formalita, 0) / pezzi.length;
 
   const dallArmadio = (slot: SlotVestito, ordine: CategoriaId[], offset: number): Capo | undefined => {
-    const adatti = armadio.filter((capo) => ordine.includes(capo.categoria) && capo.occasioni.includes(occasione));
+    const adatti = armadio.filter((capo) => ordine.includes(capo.categoria) && capo.occasioni.includes(occasione) && !capo.daLavare);
     if (adatti.length === 0) return undefined;
+    const media = formalitaMedia();
     const punteggio = (capo: Capo) => {
       let p = 10 - ordine.indexOf(capo.categoria) * 0.6;
+      if (capo.preferito) p += 2;
+      // Messo da poco (ieri o l'altro ieri): meglio cambiare. Quello di oggi resta valido.
+      const giorni = capo.ultimoUso ? giorniTra(capo.ultimoUso, r.data) : undefined;
+      if (giorni !== undefined && giorni >= 1 && giorni <= 2) p -= 4 - giorni;
+      if (media !== undefined) p -= Math.max(0, Math.abs(categoria(capo.categoria).formalita - media) - 1) * 2;
       if (pioggia && (slot === 'capospalla' || slot === 'scarpe')) {
         if (capo.impermeabile || categoria(capo.categoria).pioggia) p += 3;
         else if (slot === 'scarpe') p -= 2;
@@ -342,10 +360,20 @@ export function proponiOutfit(r: RichiestaOutfit): Outfit {
     // Niente "total denim": giacca di jeans e jeans insieme non li proponiamo.
     const conJeans = pezzi.some((p) => p.categoria === 'jeans');
     let ordine = candidati(slot, f, occasione, genere).filter((id) => !(conJeans && id === 'giacca-jeans'));
-    if (filtro) {
-      const filtrati = ordine.filter(filtro);
+    const restringi = (condizione: (id: CategoriaId) => boolean) => {
+      const filtrati = ordine.filter(condizione);
       if (filtrati.length > 0) ordine = filtrati;
+    };
+    if (filtro) restringi(filtro);
+    // Coerenza di stile: niente capi più di due gradini lontani da quelli già scelti (es. scarpe da corsa e blazer).
+    const media = formalitaMedia();
+    if (media !== undefined) restringi((id) => Math.abs(categoria(id).formalita - media) <= 2);
+    // Sotto i 18° senza maglione sopra servono le maniche lunghe.
+    if (slot === 'base' && t < 18 && occasione !== 'sport' && !pezzi.some((p) => p.slot === 'strato')) {
+      restringi((id) => !MANICHE_CORTE.includes(id));
     }
+    // Con vento forte, pantaloni lunghi.
+    if (slot === 'sotto' && ventoForte) restringi((id) => id !== 'shorts' && id !== 'pantaloncini-sport');
     if (ordine.length === 0) return;
     if (usaArmadio) {
       const capo = dallArmadio(slot, ordine, offset);
@@ -405,7 +433,7 @@ export function proponiOutfit(r: RichiestaOutfit): Outfit {
   // --- Accessori ---
   const accessori: Pezzo[] = [];
   const accessorio = (id: CategoriaId, colore: string, nota?: string) => {
-    const mio = armadio.find((x) => x.categoria === id);
+    const mio = armadio.find((x) => x.categoria === id && !x.daLavare);
     accessori.push(
       mio
         ? { slot: 'accessorio', categoria: id, nome: mio.nome || categoria(id).nome, ...coloriDelCapo(mio), capo: mio, nota }
@@ -416,10 +444,20 @@ export function proponiOutfit(r: RichiestaOutfit): Outfit {
   if (t < 10) accessorio('sciarpa', accento);
   if (t < 5) accessorio('berretto', pal.neutri[0]);
   if (t < 3) accessorio('guanti', pal.neutri[0]);
+  const forseGocce = !pioggia && !neve && c.probPioggia >= 25;
   if (pioggia || (neve && t >= 0)) accessorio('ombrello', pal.neutri[0]);
+  else if (forseGocce) accessorio('ombrello', pal.neutri[0], 'pieghevole, per sicurezza');
   const sole = c.uv >= 6 || (c.codice <= 1 && t >= 22);
   if (sole) accessorio('occhiali', categoria('occhiali').coloreTipico!);
-  if (t >= 25 && c.uv >= 5 && (occasione === 'casual' || occasione === 'sport')) accessorio('cappellino', pal.chiari[0]);
+  if (t >= 25 && c.uv >= 5) {
+    // Al sole: cappellino per lo sport, cappello di paglia per l'aperitivo, i due alternati nel tempo libero.
+    if (occasione === 'sport' || (occasione === 'casual' && variante % 2 === 0)) accessorio('cappellino', pal.chiari[0]);
+    else if (occasione === 'casual' || occasione === 'aperitivo') accessorio('cappello-paglia', categoria('cappello-paglia').coloreTipico!);
+  }
+  // Cravatta: per un'uscita elegante, una proposta sì e una no (oggi si porta anche senza).
+  if (genere === 'uomo' && occasione === 'elegante' && t < 28 && variante % 2 === 0) {
+    accessorio('cravatta', pal.accenti[(variante + 1) % pal.accenti.length]);
+  }
   if (occasione === 'sport') accessorio('borsa-sport', pal.neutri[0]);
   else if (genere === 'donna') accessorio('borsa', occasione === 'elegante' ? pal.neutri[0] : pal.neutri[(variante + 2) % pal.neutri.length]);
 
@@ -456,6 +494,7 @@ export function proponiOutfit(r: RichiestaOutfit): Outfit {
   if (r.sensibilita === 'caloroso') motivi.push(`Soffri il caldo: ho considerato 3° in più.`);
   if (neve) motivi.push('Neve prevista: stivali e capospalla caldo.');
   else if (pioggia) motivi.push(`Pioggia probabile (${Math.round(c.probPioggia)}%): capi che riparano, scarpe chiuse e ombrello.`);
+  if (forseGocce) motivi.push(`Qualche goccia possibile (${Math.round(c.probPioggia)}%): un ombrello pieghevole in borsa.`);
   if (ventoForte) motivi.push(`Vento fino a ${Math.round(c.vento)} km/h: meglio una giacca che ripari.`);
   if (sbalzo) motivi.push(`Sbalzo di ${Math.round(escursione)}° nella giornata: vestiti a strati.`);
   if (sole && t >= 15) motivi.push(`Sole${c.uv >= 6 ? ` e UV alto (${Math.round(c.uv)})` : ''}: occhiali da sole.`);

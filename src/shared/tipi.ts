@@ -44,6 +44,14 @@ export interface Capo {
   nome?: string;
   occasioni: Occasione[];
   impermeabile: boolean;
+  /** Capo preferito: a parità di altro viene proposto prima. */
+  preferito?: boolean;
+  /** In lavatrice: non viene proposto finché non torna pulito. */
+  daLavare?: boolean;
+  /** Quante volte l'hai messo ("Lo metto oggi"). */
+  usi?: number;
+  /** Ultimo giorno in cui l'hai messo, "AAAA-MM-GG". */
+  ultimoUso?: string;
   /** Foto già ridimensionata (JPEG). Assente: si usa la sagoma colorata. */
   foto?: Blob;
   creato: number;
