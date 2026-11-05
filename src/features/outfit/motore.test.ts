@@ -170,6 +170,31 @@ describe('outfit senza armadio', () => {
     }
   });
 
+  it('la correzione imparata dai riscontri sposta la temperatura', () => {
+    const o = proponiOutfit(richiesta(16.5, { correzione: 2 }));
+    expect(o.temperatura).toBe(14.5);
+    expect(slot(o)).toContain('strato');
+    expect(o.motivi.join(' ')).toContain('senti più freddo');
+    expect(proponiOutfit(richiesta(16.5, { correzione: 9 })).temperatura).toBe(12.5);
+  });
+
+  it('un vestito bloccato esclude gonna e maglia; un capo bloccato resta anche se non servirebbe', () => {
+    const vestito = { slot: 'intero' as const, categoria: 'vestito' as const, nome: 'Vestito', colore: '#6d1a2c', nomeColore: 'bordeaux' };
+    const o = proponiOutfit(richiesta(20, { genere: 'donna', bloccati: [vestito] }));
+    expect(slot(o)).toEqual(expect.arrayContaining(['intero', 'scarpe']));
+    expect(slot(o)).not.toContain('sotto');
+    expect(slot(o)).not.toContain('base');
+    const cardigan = { slot: 'strato' as const, categoria: 'cardigan' as const, nome: 'Cardigan', colore: '#9db8a0', nomeColore: 'verde salvia' };
+    expect(ids(proponiOutfit(richiesta(26, { bloccati: [cardigan] })))).toContain('cardigan');
+  });
+
+  it('nomi e modelli diversi per donna e uomo', () => {
+    const donna = Array.from({ length: 6 }, (_, v) => proponiOutfit(richiesta(12, { genere: 'donna', variante: v }))).flatMap((o) => o.pezzi);
+    expect(donna.every((p) => typeof p.modello === 'number')).toBe(true);
+    const uomo = proponiOutfit(richiesta(12, { genere: 'uomo' })).pezzi;
+    expect(uomo.map((p) => p.nome).join(' ')).not.toMatch(/skinny|a zampa|sciancrato/);
+  });
+
   it('con vento forte serve una giacca anche se è mite', () => {
     const o = proponiOutfit(richiesta(19, {}, { vento: 40 }));
     expect(slot(o)).toContain('capospalla');

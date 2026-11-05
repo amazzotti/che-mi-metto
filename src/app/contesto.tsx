@@ -11,6 +11,9 @@ export interface DatiApp {
   adesso: number;
   apriPosizione: () => void;
   vaiA: (scheda: Scheda) => void;
+  /** "Abbinalo": capo dell'armadio da tenere fisso negli outfit di oggi. */
+  daAbbinare?: Capo;
+  abbina: (capo: Capo) => void;
 }
 
 export type Scheda = 'oggi' | 'settimana' | 'armadio' | 'profilo';

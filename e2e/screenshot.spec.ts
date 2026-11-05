@@ -99,6 +99,13 @@ test('anteprime per il README', async ({ page }) => {
   await mostraDallAlto(page, '.idee');
   await foto(page, '10-idee-generiche');
 
+  // Lucchetto: fisso la parte di sotto e sfoglio altre idee.
+  const sotto = page.getByRole('tabpanel').first().locator('[data-slot="sotto"], [data-slot="intero"]').first();
+  await sotto.getByRole('button', { name: /Tieni fisso/ }).click();
+  await page.getByRole('button', { name: 'Altre idee' }).click();
+  await mostraDallAlto(page, '.idee');
+  await foto(page, '11-lucchetto');
+
   await caricaBackup(page);
   // Il banner per installare su iPhone lo nascondiamo nelle anteprime.
   await page.evaluate(() => localStorage.setItem('banner-installa-chiuso', '1'));
@@ -125,10 +132,27 @@ test('anteprime per il README', async ({ page }) => {
   await foto(page, '07-nuovo-capo');
   await page.keyboard.press('Escape');
 
+  await page.getByRole('button', { name: 'Aggiunta rapida' }).click();
+  await page.getByRole('dialog', { name: 'Aggiunta rapida' }).getByRole('button', { name: 'verde salvia' }).click();
+  await foto(page, '12-aggiunta-rapida');
+  await page.keyboard.press('Escape');
+
   await page.emulateMedia({ colorScheme: 'dark' });
   await page.getByRole('link', { name: 'Oggi' }).click();
   await page.getByRole('button', { name: 'Elegante', exact: true }).click();
   await foto(page, '08-tema-scuro');
+});
+
+test('idee per uomo', async ({ page }) => {
+  await preparaPagina(page);
+  await page.goto('./');
+  await page.evaluate(() => localStorage.setItem('banner-installa-chiuso', '1'));
+  await primoAvvio(page, 'Uomo');
+  await mostraDallAlto(page, '.idee');
+  await foto(page, '13-uomo');
+  await page.getByRole('button', { name: 'Elegante', exact: true }).click();
+  await mostraDallAlto(page, '.idee');
+  await foto(page, '14-uomo-elegante');
 });
 
 test('galleria delle sagome', async ({ page }) => {

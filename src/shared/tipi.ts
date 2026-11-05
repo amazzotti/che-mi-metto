@@ -28,6 +28,8 @@ export interface Posizione {
 export interface Profilo {
   genere: Genere;
   sensibilita: Sensibilita;
+  /** Gradi di correzione imparati da "Ieri com'era?" (positivo = senti più freddo). */
+  correzione?: number;
   posizione?: Posizione;
 }
 
@@ -41,6 +43,8 @@ export interface Capo {
   fantasia?: Fantasia;
   /** Secondo colore della fantasia. */
   colore2?: string;
+  /** Modello della sagoma (es. jeans skinny o a zampa), se non c'è la foto. */
+  modello?: number;
   nome?: string;
   occasioni: Occasione[];
   impermeabile: boolean;

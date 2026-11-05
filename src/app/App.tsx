@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useArmadio } from '../features/armadio/armadio';
 import { PaginaArmadio } from '../features/armadio/PaginaArmadio';
 import { PaginaOggi, PaginaSettimana } from '../features/giornata/Pagine';
@@ -9,7 +9,8 @@ import { useAdesso, useMeteo } from '../features/meteo/useMeteo';
 import { PaginaProfilo } from '../features/profilo/PaginaProfilo';
 import { aggiornaProfilo, useProfilo } from '../features/profilo/profilo';
 import { oggiDispositivo } from '../shared/date';
-import type { Profilo } from '../shared/tipi';
+import type { Capo, Profilo } from '../shared/tipi';
+import { GenereSagome } from '../features/outfit/Sagoma';
 import { Foglio } from '../shared/ui/Foglio';
 import { IconaArmadio, IconaOggi, IconaPosizione, IconaProfilo, IconaSettimana } from '../shared/ui/Icone';
 import { AggiornamentoPwa } from './AggiornamentoPwa';
@@ -31,11 +32,17 @@ function schedaDaHash(): Scheda {
 }
 
 /** La scheda attiva sta nell'indirizzo (#armadio...), così il tasto "indietro" funziona. */
-function useScheda(): [Scheda, (s: Scheda) => void] {
+function useScheda(alCambio?: (s: Scheda) => void): [Scheda, (s: Scheda) => void] {
   const [scheda, setScheda] = useState<Scheda>(schedaDaHash);
+  const richiamo = useRef(alCambio);
+  useEffect(() => {
+    richiamo.current = alCambio;
+  });
   useEffect(() => {
     const cambia = () => {
-      setScheda(schedaDaHash());
+      const nuova = schedaDaHash();
+      richiamo.current?.(nuova);
+      setScheda(nuova);
       window.scrollTo({ top: 0 });
     };
     window.addEventListener('hashchange', cambia);
@@ -55,7 +62,11 @@ export function App() {
 }
 
 function Guscio({ profilo }: { profilo: Profilo }) {
-  const [scheda, vaiA] = useScheda();
+  const [daAbbinare, setDaAbbinare] = useState<Capo | undefined>();
+  // Lasciata la pagina Oggi, il capo da abbinare non serve più.
+  const [scheda, vaiA] = useScheda((s) => {
+    if (s !== 'oggi') setDaAbbinare(undefined);
+  });
   const meteo = useMeteo(profilo.posizione);
   const armadio = useArmadio() ?? [];
   const adesso = useAdesso();
@@ -69,10 +80,15 @@ function Guscio({ profilo }: { profilo: Profilo }) {
   const apriPosizione = useCallback(() => setPosizioneAperta(true), []);
   const chiudiPosizione = useCallback(() => setPosizioneAperta(false), []);
 
-  const dati: DatiApp = { profilo, meteo, armadio, oggi, adesso, apriPosizione, vaiA };
+  const abbina = (capo: Capo) => {
+    setDaAbbinare(capo);
+    vaiA('oggi');
+  };
+  const dati: DatiApp = { profilo, meteo, armadio, oggi, adesso, apriPosizione, vaiA, daAbbinare, abbina };
 
   return (
     <ContestoApp.Provider value={dati}>
+      <GenereSagome.Provider value={profilo.genere}>
       <a href="#contenuto" className="salta">
         Vai al contenuto
       </a>
@@ -87,7 +103,7 @@ function Guscio({ profilo }: { profilo: Profilo }) {
       </header>
 
       <main className="contenuto" id="contenuto" tabIndex={-1}>
-        {scheda === 'oggi' && <PaginaOggi />}
+        {scheda === 'oggi' && <PaginaOggi key={daAbbinare?.id ?? 'oggi'} />}
         {scheda === 'settimana' && <PaginaSettimana />}
         {scheda === 'armadio' && <PaginaArmadio />}
         {scheda === 'profilo' && <PaginaProfilo />}
@@ -112,6 +128,7 @@ function Guscio({ profilo }: { profilo: Profilo }) {
       </Foglio>
       <BannerInstalla />
       <AggiornamentoPwa />
+      </GenereSagome.Provider>
     </ContestoApp.Provider>
   );
 }

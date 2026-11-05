@@ -6,6 +6,7 @@ import { Scelta, SceltaMultipla } from '../../shared/ui/Scelta';
 import { type CategoriaId, categoria, categoriePerGenere, NOMI_SLOT } from '../outfit/catalogo';
 import { COLORI, eChiaro, nomeColore } from '../outfit/colori';
 import { descriviColore, type Fantasia, FANTASIE } from '../outfit/fantasie';
+import { modelli } from '../outfit/modelli';
 import { Figura } from '../outfit/SchedaOutfit';
 import { aggiornaCapo, aggiungiCapo, eliminaCapo } from './armadio';
 import { preparaFoto } from './foto';
@@ -15,21 +16,29 @@ interface Props {
   capo?: Capo;
   genere: Genere;
   onChiudi: () => void;
+  /** "Abbinalo": crea gli outfit di oggi partendo da questo capo. */
+  onAbbina?: (capo: Capo) => void;
 }
 
-export function FoglioCapo({ aperto, capo, genere, onChiudi }: Props) {
+export function FoglioCapo({ aperto, capo, genere, onChiudi, onAbbina }: Props) {
   return (
     <Foglio aperto={aperto} titolo={capo ? 'Modifica capo' : 'Nuovo capo'} onChiudi={onChiudi}>
-      {aperto && <Modulo key={capo?.id ?? 'nuovo'} capo={capo} genere={genere} onFatto={onChiudi} />}
+      {aperto && <Modulo key={capo?.id ?? 'nuovo'} capo={capo} genere={genere} onFatto={onChiudi} onAbbina={onAbbina} />}
     </Foglio>
   );
 }
 
-function Modulo({ capo, genere, onFatto }: { capo?: Capo; genere: Genere; onFatto: () => void }) {
+function nomeModello(m: { nome?: string; nomeCompleto?: string }): string {
+  const n = m.nomeCompleto ?? m.nome;
+  return n ? n.charAt(0).toUpperCase() + n.slice(1) : 'Classico';
+}
+
+function Modulo({ capo, genere, onFatto, onAbbina }: { capo?: Capo; genere: Genere; onFatto: () => void; onAbbina?: (capo: Capo) => void }) {
   const idFoto = useId();
   const [tipo, setTipo] = useState<CategoriaId>(capo?.categoria ?? 'tshirt');
   const [colore, setColore] = useState(capo?.colore ?? '#1f2a44');
   const [fantasia, setFantasia] = useState<Fantasia>(capo?.fantasia ?? 'unita');
+  const [modello, setModello] = useState(capo?.modello ?? 0);
   const [colore2, setColore2] = useState(capo?.colore2 ?? '#ffffff');
   const [nome, setNome] = useState(capo?.nome ?? '');
   const [occasioni, setOccasioni] = useState<Occasione[]>(capo?.occasioni ?? [...categoria('tshirt').occasioni]);
@@ -44,9 +53,11 @@ function Modulo({ capo, genere, onFatto }: { capo?: Capo; genere: Genere; onFatt
   const gruppi = categoriePerGenere(genere);
   // Se il capo è di una categoria dell'altro genere (es. backup condiviso), la teniamo comunque.
   const tipoPresente = gruppi.some((g) => g.categorie.some((c) => c.id === tipo));
+  const modelliTipo = modelli(info.sagoma, genere);
 
   const cambiaTipo = (id: CategoriaId) => {
     setTipo(id);
+    setModello(0);
     setOccasioni([...categoria(id).occasioni]);
     setImpermeabile(Boolean(categoria(id).pioggia && categoria(id).slot === 'capospalla'));
   };
@@ -83,6 +94,7 @@ function Modulo({ capo, genere, onFatto }: { capo?: Capo; genere: Genere; onFatt
       colore,
       fantasia: conFantasia ? fantasia : undefined,
       colore2: conFantasia ? colore2 : undefined,
+      modello: modelliTipo.length > 1 ? modello : undefined,
       nome: nome.trim() || undefined,
       occasioni,
       impermeabile,
@@ -111,7 +123,7 @@ function Modulo({ capo, genere, onFatto }: { capo?: Capo; genere: Genere; onFatt
       <div className="anteprima-capo">
         <div className="anteprima-figura">
           <Figura
-            pezzo={{ categoria: tipo, colore, fantasia, colore2, nome: nome || info.nome, capo: foto ? ({ foto } as Capo) : undefined }}
+            pezzo={{ categoria: tipo, colore, fantasia, colore2, modello, nome: nome || info.nome, capo: foto ? ({ foto } as Capo) : undefined }}
           />
         </div>
         <div className="anteprima-azioni">
@@ -144,6 +156,19 @@ function Modulo({ capo, genere, onFatto }: { capo?: Capo; genere: Genere; onFatt
           ))}
         </select>
       </label>
+
+      {modelliTipo.length > 1 && !foto && (
+        <div className="campo">
+          <span>Modello</span>
+          <Scelta
+            etichetta="Modello"
+            opzioni={modelliTipo.map((m, i) => ({ id: String(i), nome: nomeModello(m) }))}
+            valore={String(modello % modelliTipo.length)}
+            onCambia={(i) => setModello(Number(i))}
+            stile="chip"
+          />
+        </div>
+      )}
 
       <div className="campo">
         <span>
@@ -238,6 +263,11 @@ function Modulo({ capo, genere, onFatto }: { capo?: Capo; genere: Genere; onFatt
       <button type="submit" className="bottone primario largo" disabled={lavoro}>
         {capo ? 'Salva modifiche' : "Aggiungi all'armadio"}
       </button>
+      {capo && onAbbina && (
+        <button type="button" className="bottone secondario largo" onClick={() => onAbbina(capo)}>
+          Abbinalo: idee per oggi con questo capo
+        </button>
+      )}
       {capo && (
         <button type="button" className="bottone pericolo largo" onClick={elimina}>
           <IconaCestino /> Elimina capo

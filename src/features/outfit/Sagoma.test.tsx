@@ -2,7 +2,8 @@ import { render } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 import { eIos } from '../../app/BannerInstalla';
 import { CATALOGO } from './catalogo';
-import { Sagoma, SAGOME_DISPONIBILI } from './Sagoma';
+import { Sagoma } from './Sagoma';
+import { SAGOME_DISPONIBILI } from './sagome';
 
 describe('sagome', () => {
   it('esiste una sagoma per ogni capo del catalogo', () => {

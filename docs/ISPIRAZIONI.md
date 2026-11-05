@@ -16,6 +16,22 @@ spunti di design.
 | [googlarz/fashion-skill](https://github.com/googlarz/fashion-skill) | CC BY 4.0 | Regole di stile scritte per un assistente | Evitare di riproporre lo stesso outfit a breve distanza |
 | [Lazztech/Libre-Closet](https://github.com/Lazztech/Libre-Closet) | AGPL-3.0 | Armadio digitale PWA | Idee di interfaccia: più colori per capo, stato di lavaggio, archivio |
 
+## Le app commerciali
+
+Il codice di queste app non è pubblico, quindi ho studiato come funzionano dall'esterno: siti, pagine di aiuto, schede degli
+store e recensioni.
+
+| App | Come lavora | Cosa ne ho preso |
+|---|---|---|
+| [Whering](https://whering.co.uk/faq/styling-and-outfits) | "Dress Me": rimescola gli outfit e permette di **fissare un capo**; statistiche e costo per utilizzo | Il **lucchetto** e le idee da sfogliare |
+| [Acloset](https://www.acloset.app/) | Consigli da meteo e agenda; **scegli un capo e completa lui il resto** | **"Abbinalo"** dalla scheda del capo |
+| [Stylebook](https://stylebookapp.com/features.html) | Stato del capo (pulito, da lavare, prestato), statistiche "mai usati" e "più usati" | Capi **da lavare** e **statistiche** |
+| [Cladwell](https://apps.apple.com/us/app/cladwell/id1140550878) | Armadio creato scegliendo da **immagini già pronte**, una nota sul perché di ogni outfit | **Aggiunta rapida** con le sagome |
+| [Weather Outfit](https://apps.apple.com/app/id6769089874), WTWT | Dopo ogni giornata un tocco "freddo / giusto / caldo" che regola le proposte | **"Ieri com'era?"** |
+
+Il difetto più citato nelle recensioni di queste app è la **ripetitività** (e capi sbagliati per il meteo): per questo le
+idee cambiano ogni giorno, si scelgono diverse tra loro e il motore ha soglie di temperatura verificate dai test.
+
 ## Cosa è entrato nell'app
 
 - **Soglie riviste** sulla temperatura percepita (corretta di ±3° per chi è freddoloso o caloroso):
@@ -30,6 +46,10 @@ spunti di design.
   gli usi e fa variare le proposte dei due giorni seguenti.
 - **Catalogo più ricco**: gilet, parka, giacca di pelle, pantaloni cargo e di velluto, pantaloni palazzo, tuta intera, sandali
   col tacco, cravatta, cappello di paglia.
+
+- **Sagome diverse per donna e uomo** con più modelli per capo, così le idee non hanno tutte la stessa faccia.
+- **Lucchetto**, **"Abbinalo"**, **aggiunta rapida**, **"Ieri com'era?"** e **statistiche** dalle app commerciali qui sopra,
+  rifatti in versione gratuita e tutta sul telefono.
 
 ## Cosa ho aggiunto io
 

@@ -44,15 +44,24 @@ iPhone, senza passare dall'App Store.
   lista di cosa mettere in borsa.
 - 🧥 **Armadio digitale**: carichi i capi uno per uno, con una foto o scegliendo solo tipo e colore. Il colore viene
   riconosciuto dalla foto. I consigli usano i tuoi vestiti, abbinano i colori e segnalano cosa manca.
-- 🎨 **Sagome disegnate a mano**: senza foto ogni capo è una sagoma SVG con il suo colore e, se vuoi, una fantasia
-  (righe, quadri, pois, fiori) con un secondo colore. Nelle idee generiche l'app aggiunge da sola un capo fantasia
-  adatto a stagione e occasione: fiori in primavera, quadri in autunno, niente fantasie in palestra.
-- 🔄 **Tre idee diverse da sfogliare** per ogni giornata e ogni impegno ("La più adatta", "Più elegante", "Con fantasia"…),
-  più il pulsante **"Altre idee"**. Le idee vengono scelte perché si somiglino il meno possibile.
+- 🎨 **Sagome disegnate a mano, diverse per donna e uomo**: t-shirt aderente od oversize, blazer sciancrato, cappotto a
+  vestaglia, jeans skinny o a zampa, gonna a tubino o a ruota, vestito a sottoveste… Ogni capo ha il suo colore e, se vuoi,
+  una fantasia (righe, quadri, pois, fiori) con un secondo colore. Nelle idee generiche l'app aggiunge da sola un capo
+  fantasia adatto a stagione e occasione: fiori in primavera, quadri in autunno, niente fantasie in palestra.
+- 🔄 **Tre idee diverse da sfogliare** per ogni giornata e ogni impegno, con un titolo che dice cosa cambia ("Con jeans a
+  zampa", "Più elegante"…), e **"Altre idee"** per continuare. Le proposte **cambiano da un giorno all'altro** e per la
+  donna includono sempre anche gonne, vestiti, top e ballerine.
+- 🔒 **Lucchetto**: fissi un capo che ti piace (o che vuoi mettere per forza) e sfogli le idee costruite intorno a lui.
+  Dall'armadio, **"Abbinalo"** apre gli outfit di oggi già con quel capo.
+- ⚡ **Aggiunta rapida**: scegli un colore e tocchi le sagome dei capi che hai: l'armadio è pronto in due minuti, senza
+  foto. Per ogni capo puoi scegliere anche il **modello** (es. jeans skinny o a zampa).
+- 🌡️ **"Ieri com'era?"**: la mattina dopo ti chiede se avevi freddo o caldo e corregge da sola, di mezzo grado alla
+  volta, la temperatura su cui ragiona.
 - 👕 **Oltre 60 tipi di capi** per uomo e donna, dal gilet al parka, dalla tuta intera ai pantaloni palazzo, ognuno con un
   livello di **formalità**: nello stesso outfit non finiscono mai capi che stonano.
 - ♥ **Preferiti, "da lavare" e "Lo metto oggi"**: i preferiti escono più spesso, i capi in lavatrice no, e quello che hai
-  messo oggi non te lo ripropone domani. **Sensibilità al freddo** personale (freddoloso / nella media / caloroso).
+  messo oggi non te lo ripropone domani. **Statistiche**: quanto dell'armadio usi, i capi più messi e quelli da
+  riscoprire. **Sensibilità al freddo** personale (freddoloso / nella media / caloroso).
 - 📴 **Funziona offline** con le ultime previsioni salvate, **tema chiaro e scuro**, interfaccia pensata per il pollice.
 - 🔒 **Privacy**: nessun account e nessun server. Profilo, foto e impegni restano sul telefono; backup e ripristino con un
   file.
@@ -84,17 +93,27 @@ test.
    scelti, formalità coerente, preferito, non messo ieri; i capi da lavare sono esclusi. Senza armadio si usa una **palette
    di stagione**, con al massimo un capo **fantasia** per outfit e un secondo colore che stacca dal fondo.
 5. Il motore genera nove varianti e ne tiene **tre il più possibile diverse** (somiglianza di Jaccard tra capi e colori).
+   Il punto di partenza dipende dal giorno, quindi le proposte cambiano ogni giorno ma restano stabili nella giornata. I capi
+   fissati con il **lucchetto** restano in tutte le varianti; la **correzione personale** imparata da "Ieri com'era?"
+   sposta la temperatura su cui ragiona.
 6. Ogni consiglio arriva con il **perché**: *"Percepiti 8°: fa freddo. Pioggia probabile (80%): capi che riparano, scarpe
    chiuse e ombrello."*
 
-Prima di scriverlo ho studiato il codice di otto app open source di outfit e armadio digitale: cosa ho imparato da ciascuna,
-con le licenze, è in [docs/ISPIRAZIONI.md](docs/ISPIRAZIONI.md).
+Prima di scriverlo ho studiato il codice di otto app open source di outfit e armadio digitale e il funzionamento delle app
+commerciali più usate (Whering, Acloset, Stylebook, Cladwell, app meteo-outfit): cosa ho imparato da ciascuna, con le
+licenze, è in [docs/ISPIRAZIONI.md](docs/ISPIRAZIONI.md).
 
 <p align="center">
-  <img src="docs/screenshots/10-idee-generiche.png" width="24%" alt="Idea di outfit senza armadio, con un capo a fantasia" />
+  <img src="docs/screenshots/10-idee-generiche.png" width="24%" alt="Idea di outfit da donna senza armadio" />
+  <img src="docs/screenshots/11-lucchetto.png" width="24%" alt="Un capo fissato con il lucchetto" />
+  <img src="docs/screenshots/13-uomo.png" width="24%" alt="Idea di outfit da uomo" />
+  <img src="docs/screenshots/12-aggiunta-rapida.png" width="24%" alt="Aggiunta rapida dei capi" />
+</p>
+<p align="center">
   <img src="docs/screenshots/03-outfit-armadio.png" width="24%" alt="Outfit con capi dell'armadio e capi mancanti" />
+  <img src="docs/screenshots/14-uomo-elegante.png" width="24%" alt="Uscita elegante da uomo" />
   <img src="docs/screenshots/04-settimana.png" width="24%" alt="Previsioni della settimana" />
-  <img src="docs/screenshots/09-sagome.png" width="24%" alt="Tutte le sagome dei capi" />
+  <img src="docs/screenshots/09-sagome.png" width="24%" alt="Tutte le sagome dei capi, da donna e da uomo" />
 </p>
 
 ## Tecnologie
@@ -189,6 +208,9 @@ the day** (work, date, cocktails, formal event, gym) and, optionally, **your own
 - Each event gets an outfit computed on the forecast **for that hour**; the gym gets a "pack in your bag" list.
 - **Three swipeable, deliberately different ideas** per day and per event: nine variants are generated and the three with
   the lowest Jaccard similarity are kept. Each of 60+ garment types has a 1–5 **formality** level to keep outfits coherent.
+- Gender-specific hand-drawn silhouettes with several models per garment, daily-changing suggestions, a **lock** to keep
+  a piece fixed while browsing ideas, "style this piece" from the wardrobe, a quick-add grid, and a daily "how was
+  yesterday?" check that self-calibrates the temperature offset.
 - Wardrobe extras inspired by open-source projects (see [docs/ISPIRAZIONI.md](docs/ISPIRAZIONI.md)): favourites, "in the
   laundry" items excluded, and an "I'm wearing it today" button that tracks wear count and avoids repeats.
 - Privacy by design: no account, no server, everything stays in IndexedDB on the phone, with JSON backup/restore.
